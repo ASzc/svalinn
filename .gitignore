@@ -1,0 +1,8 @@
+*.swp
+/.ceylon/config.old
+/classes
+/.classpath
+/.exploded
+/modules
+/.project
+/.settings
