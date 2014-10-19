@@ -16,7 +16,7 @@ import ceylon.language.meta.model {
  HMAC can also be used to augment other secrets (like passwords) to make the
  output hash more resistant to certain kinds of reversal attacks (e.g. rainbow
  tables)."
-shared abstract class Hmac(key, delegateClass) satisfies SecureHash {
+shared abstract class Hmac(delegateClass, key = null) satisfies SecureHash {
     "An instance of this is created for use as the HMAC hash algorithm."
     Class<SecureHash,[]> delegateClass;
     
@@ -24,8 +24,16 @@ shared abstract class Hmac(key, delegateClass) satisfies SecureHash {
      too long, and applied when creating the layered output hash."
     SecureHash delegate = delegateClass();
     
-    "The shared secret used to sign the input"
-    variable Array<Byte> key;
+    "The shared secret used to sign the input. If [[null]], [[newKey]] must be
+     called before calling any other method."
+    Array<Byte>? key;
+    
+    void processKey(Array<Byte> key) {
+        // TODO
+    }
+    if (exists key) {
+        processKey(key);
+    }
     
     // TODO normalise the length of the key (apply hash if too long, pad if too short)
     // TODO process key into inner and outer key pad (don't need the message for this)
@@ -46,14 +54,13 @@ shared abstract class Hmac(key, delegateClass) satisfies SecureHash {
     
     shared actual void reset() {
         delegate.reset();
-        // TODO
+        // TODO ???
     }
     
     "Prepare the object to be reused. Restores the object to the state it had
      at creation time, except with a new [[key]]."
     shared void newKey(Array<Byte> key) {
         reset();
-        // TODO will have to do the normalise, inner+outer, etc. process here as well (dedup if possible)
-        this.key = key;
+        processKey(key);
     }
 }
