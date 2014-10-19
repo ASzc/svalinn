@@ -1,4 +1,4 @@
-"An interface for applying secure hash (message digest) algorithms;
+"An abstract class for applying secure hash (message digest) algorithms;
  
  * to arbitrary size input (a message),
  * with a shared secret (a key),
@@ -12,8 +12,28 @@
  HMAC can also be used to augment other secrets (like passwords) to make the
  output hash more resistant to certain kinds of reversal attacks (e.g. rainbow
  tables)."
-shared interface Hmac satisfies SecureHash {
+shared abstract class Hmac(delegate) satisfies SecureHash {
+    "Used to hash keys that are too long, and applied twice when creating the
+     final layered output hash."
+    SecureHash delegate;
+    
+    shared actual Integer outputSize => delegate.outputSize;
+    shared actual Integer blockSize => delegate.blockSize;
+    
+    shared actual Array<Byte> done() {
+        return nothing;
+    }
+    
+    shared actual void more(Array<Byte> input) {
+    }
+    
+    shared actual void reset() {
+    }
+    
+    
     "Prepare the object to be reused. Restores the object to the state it had
      at creation time, except with a new [[key]]."
-    shared formal void newKey(Array<Byte> key);
+    shared void newKey(Array<Byte> key) {
+        // TODO
+    }
 }
