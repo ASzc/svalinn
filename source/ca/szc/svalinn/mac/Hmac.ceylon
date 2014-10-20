@@ -1,3 +1,7 @@
+import ca.szc.svalinn {
+    KeyedHash,
+    BlockedHash
+}
 import ceylon.language.meta.model {
     Class
 }
@@ -16,16 +20,15 @@ import ceylon.language.meta.model {
  HMAC can also be used to augment other secrets (like passwords) to make the
  output hash more resistant to certain kinds of reversal attacks (e.g. rainbow
  tables)."
-shared abstract class Hmac(delegateClass, originalKey = null) satisfies SecureHash {
+shared abstract class Hmac(delegateClass, originalKey = null) satisfies KeyedHash {
     "An instance of this is created for use as the HMAC hash algorithm."
-    Class<SecureHash,[]> delegateClass;
+    Class<BlockedHash,[]> delegateClass;
     
     "The encapsulated instance of [[delegateClass]]. Used to hash keys that are
      too long, and applied when creating the layered output hash."
-    SecureHash delegate = delegateClass();
+    BlockedHash delegate = delegateClass();
     
     shared actual Integer outputSize => delegate.outputSize;
-    shared actual Integer blockSize => delegate.blockSize;
     
     "[[null]] when [[originalKey]] wasn't been specified and [[newKey]] hasn't been
      called. Set by [[processKey]]."
@@ -35,7 +38,7 @@ shared abstract class Hmac(delegateClass, originalKey = null) satisfies SecureHa
         delegate.reset();
         
         Array<Byte> normalisedKey;
-        if (key.longerThan(blockSize)) {
+        if (key.longerThan(delegate.blockSize)) {
             normalisedKey = delegate.last(key);
         } else {
             // TODO pad to blockSize

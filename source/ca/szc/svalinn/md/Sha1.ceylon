@@ -1,8 +1,8 @@
 import ca.szc.svalinn {
-    SecureHash
+    MerkleDamgardHash
 }
 
-class Sha1() satisfies SecureHash {
+shared class Sha1() extends MerkleDamgardHash() {
     shared actual Integer blockSize => nothing;
     
     shared actual Array<Byte> done() => nothing;
