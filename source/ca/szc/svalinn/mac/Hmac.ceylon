@@ -67,9 +67,7 @@ shared abstract class Hmac(delegateClass, originalKey = null) satisfies KeyedHas
     }
     reset();
     
-    "Prepare the object to be reused. Restores the object to the state it had
-     at creation time, except with a new [[key]]."
-    shared void newKey(Array<Byte> key) {
+    shared actual void newKey(Array<Byte> key) {
         processKey(key);
     }
     
