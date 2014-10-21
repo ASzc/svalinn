@@ -1,12 +1,12 @@
 # Svalinn - A cryptography library for Ceylon
 
-Svalinn is pure Ceylon, meaning that it will not restrict other software to a particular target of the Ceylon compiler. Usually, accessing cryptographic algorithms would mean using a native library (JVM xor JS), limiting the software to one target only.
+Svalinn is written in pure Ceylon, so it will not restrict you to a particular target of the Ceylon compiler.
 
-Unlike the standard library of Java, an attempt has been made to use the language's type system. This means that Svalinn is statically type safe (no `String` algorithm names and `NoSuchAlgorithmException`s!), and is far easier to understand and extend with new algorithms.
+Unlike the standard library of Java, Svalinn uses the language's type system for algorithm implementation. This means that Svalinn is far easier to understand and extend. It's also type safe, so you don't have to use `String` algorithm names and catch `NoSuchAlgorithmException`s!
 
 ## Usage
 
-Svalinn works on `Array<Byte>` objects. To get text `String`s into and out of this form, you'll have to convert them using `ceylon.io.charset`. Unfortunately, this is part of a JVM only module in the current release of Ceylon, but that package could feasibly be converted to pure Ceylon. The usual encoding for output hashes is hexadecimal, which isn't provided by the SDK ??? TODO hex conversion lib?
+Svalinn works on `Array<Byte>` objects. To get `String`s into and out of this form, `ceylon.io.charset` has to be applied. Unfortunately, this packagage is part of a JVM-only module in the current release of Ceylon, but it would be feasible to implement a pure Ceylon version. The usual encoding for output hashes is hexadecimal, which isn't provided by the SDK ??? TODO hex conversion lib?
 
 ## Algorithms
 
