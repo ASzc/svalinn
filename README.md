@@ -28,6 +28,7 @@ The compression function interface is a combination of the Java and Python stand
 A better understanding of the following points was obtained from the *Handbook of Applied Cryptography* by A. Menezes, P. van Oorschot and S. Vanstone. Thanks to the authors and the publisher for making it available without cost.
 
 - Cryptographic hash function classification
+- Merkle–Damgård construction
 
 ## License
 
