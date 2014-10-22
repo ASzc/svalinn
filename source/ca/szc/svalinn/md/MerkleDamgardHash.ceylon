@@ -1,11 +1,24 @@
+import ca.szc.svalinn {
+    BlockedVariableInputCompressor,
+    FixedInputCompressor
+}
+import ceylon.language.meta.model {
+    Class
+}
+
 "Abstract class for hash functions that apply Merkle–Damgård construction in
  order to accept arbitrary sized input into a fixed input compression
  function."
-shared abstract class MerkleDamgardHash() satisfies BlockedHash {
-    "Process a complete block of size [[blockSize]]. This method will be called
-     automatically each time a [[blockSize]] sized piece of input has been
-     gathered."
-    shared formal void compressBlock(Array<Byte> block);
+shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariableInputCompressor {
+    "An instance of this is created for use as the compression algorithm."
+    Class<FixedInputCompressor,[]> delegateClass;
+    
+    "The encapsulated instance of [[delegateClass]]."
+    FixedInputCompressor delegate = delegateClass();
+    
+    shared actual Integer blockSize => delegate.blockSize;
+    
+    shared actual Integer outputSize => delegate.outputSize;
     
     variable Array<Byte>? blockRemainder = null;
     
@@ -16,14 +29,10 @@ shared abstract class MerkleDamgardHash() satisfies BlockedHash {
     
     shared actual Array<Byte> done() {
         if (exists br = blockRemainder) {
-            compressBlock(strengthen(br));
+            delegate.compress(strengthen(br));
         }
-        return compressorOutput();
+        return delegate.done();
     }
-    
-    "Return the current result of the inner compression function. This method
-     will be called automatically when [[done]] is called."
-    shared formal Array<Byte> compressorOutput();
     
     shared actual void more(Array<Byte> input) {
         Integer readInput;
@@ -39,7 +48,7 @@ shared abstract class MerkleDamgardHash() satisfies BlockedHash {
                 Array<Byte> blockBuffer = arrayOfSize(blockSize, 0.byte);
                 br.copyTo(blockBuffer);
                 input.copyTo(blockBuffer, 0, br.size, minimumInput);
-                compressBlock(blockBuffer);
+                delegate.compress(blockBuffer);
                 readInput = minimumInput;
             }
         } else {
@@ -49,7 +58,7 @@ shared abstract class MerkleDamgardHash() satisfies BlockedHash {
         variable Integer endOfPrevBlock = readInput;
         variable Integer remaining = input.size - readInput;
         while (remaining >= blockSize) {
-            compressBlock(input[endOfPrevBlock:blockSize]);
+            delegate.compress(input[endOfPrevBlock:blockSize]);
             endOfPrevBlock += blockSize;
             remaining -= blockSize;
         }
@@ -62,10 +71,6 @@ shared abstract class MerkleDamgardHash() satisfies BlockedHash {
     
     shared actual void reset() {
         blockRemainder = null;
-        resetCompressor();
+        delegate.reset();
     }
-    
-    "Reset the inner compression function. This method will be called
-     automatically when [[reset]] is called."
-    shared formal void resetCompressor();
 }

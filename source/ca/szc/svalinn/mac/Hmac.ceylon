@@ -1,8 +1,7 @@
 import ca.szc.svalinn {
-    KeyedHash,
-    BlockedHash
+    KeyedVariableInputCompressor,
+    BlockedVariableInputCompressor
 }
-
 import ceylon.language.meta.model {
     Class
 }
@@ -21,13 +20,13 @@ import ceylon.language.meta.model {
  HMAC can also be used to augment other secrets (like passwords) to make the
  output hash more resistant to certain kinds of reversal attacks (e.g. rainbow
  tables)."
-shared abstract class Hmac(delegateClass, originalKey = null) satisfies KeyedHash {
+shared abstract class Hmac(delegateClass, originalKey = null) satisfies KeyedVariableInputCompressor {
     "An instance of this is created for use as the HMAC hash algorithm."
-    Class<BlockedHash,[]> delegateClass;
+    Class<BlockedVariableInputCompressor,[]> delegateClass;
     
     "The encapsulated instance of [[delegateClass]]. Used to hash keys that are
      too long, and applied when creating the layered output hash."
-    BlockedHash delegate = delegateClass();
+    BlockedVariableInputCompressor delegate = delegateClass();
     
     shared actual Integer outputSize => delegate.outputSize;
     
@@ -53,9 +52,9 @@ shared abstract class Hmac(delegateClass, originalKey = null) satisfies KeyedHas
         }
         
         // XOR the pads (containing copies of the normalised key)
-        for (i->byte in inner_pad.indexed) {
-            inner_pad.set(i, byte.xor(#36.byte));
-            outer_pad.set(i, byte.xor(#5c.byte));
+        for (i->b in inner_pad.indexed) {
+            inner_pad.set(i, b.xor(#36.byte));
+            outer_pad.set(i, b.xor(#5c.byte));
         }
         delegate.more(inner_pad);
         this.outer_pad = outer_pad;
