@@ -20,39 +20,37 @@ shared abstract class MerkleDamgardHash() satisfies BlockedHash {
     shared actual void more(Array<Byte> input) {
         // Assuming size is obtained in constant time since it is fixed size and backed by a native array.
         
+        Integer readInput;
         if (exists br = blockRemainder) {
-            // TODO
-        } else {
-            //{[Byte+]*} block = input.partition(blockSize);
-            
-            //Array<Byte> buffer = Array<Byte>({0.byte}.repeat(blockSize));
-            //variable Integer endOfPrevBlock = 0;
-            //variable Integer remaining = input.size;
-            //while (remaining >= blockSize) {
-            //    input.copyTo(buffer, endOfPrevBlock, 0, blockSize);
-            //    
-            //    processBlock(buffer);
-            //    endOfPrevBlock += blockSize;
-            //    remaining -= blockSize;
-            //}
-            //if (remaining > blockSize) {
-            //    blockRemainder = input[endOfPrevBlock:remaining];
-            //} else {
-            //    blockRemainder = null;
-            //}
-            
-            variable Integer endOfPrevBlock = 0;
-            variable Integer remaining = input.size;
-            while (remaining >= blockSize) {
-                processBlock(input[endOfPrevBlock:blockSize]);
-                endOfPrevBlock += blockSize;
-                remaining -= blockSize;
-            }
-            if (remaining > blockSize) {
-                blockRemainder = input[endOfPrevBlock:remaining];
+            Integer minimumInput = blockSize - br.size;
+            if (input.size < minimumInput) {
+                Array<Byte> blockBuffer = arrayOfSize(br.size + input.size, 0.byte);
+                br.copyTo(blockBuffer);
+                input.copyTo(blockBuffer, 0, br.size, minimumInput);
+                blockRemainder = blockBuffer;
+                return;
             } else {
-                blockRemainder = null;
+                Array<Byte> blockBuffer = arrayOfSize(blockSize, 0.byte);
+                br.copyTo(blockBuffer);
+                input.copyTo(blockBuffer, 0, br.size, minimumInput);
+                processBlock(blockBuffer);
+                readInput = minimumInput;
             }
+        } else {
+            readInput = 0;
+        }
+        
+        variable Integer endOfPrevBlock = readInput;
+        variable Integer remaining = input.size - readInput;
+        while (remaining >= blockSize) {
+            processBlock(input[endOfPrevBlock:blockSize]);
+            endOfPrevBlock += blockSize;
+            remaining -= blockSize;
+        }
+        if (remaining > blockSize) {
+            blockRemainder = input[endOfPrevBlock:remaining];
+        } else {
+            blockRemainder = null;
         }
     }
     
