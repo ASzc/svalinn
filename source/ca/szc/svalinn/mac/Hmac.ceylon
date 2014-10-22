@@ -21,7 +21,9 @@ import ceylon.language.meta.model {
  output hash more resistant to certain kinds of reversal attacks (e.g. rainbow
  tables)."
 shared abstract class Hmac(delegateClass, originalKey = null) satisfies KeyedVariableInputCompressor {
-    "An instance of this is created for use as the HMAC hash algorithm."
+    "An instance of this is created for use as the HMAC hash algorithm.
+     Technically only [[ca.szc.svalinn.md::MerkleDamgardHash]] and other length
+     extension vulnerable constructions need to use HMAC for MACs."
     Class<BlockedVariableInputCompressor,[]> delegateClass;
     
     "The encapsulated instance of [[delegateClass]]. Used to hash keys that are
