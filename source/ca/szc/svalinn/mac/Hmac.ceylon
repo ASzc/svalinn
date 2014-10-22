@@ -2,6 +2,7 @@ import ca.szc.svalinn {
     KeyedHash,
     BlockedHash
 }
+
 import ceylon.language.meta.model {
     Class
 }
@@ -30,26 +31,34 @@ shared abstract class Hmac(delegateClass, originalKey = null) satisfies KeyedHas
     
     shared actual Integer outputSize => delegate.outputSize;
     
-    "[[null]] when [[originalKey]] wasn't been specified and [[newKey]] hasn't been
-     called. Set by [[processKey]]."
-    variable Array<Byte>? outer_key_pad = null;
+    "[[null]] when [[originalKey]] wasn't been specified and [[newKey]] hasn't
+     been called. Set by [[processKey]]."
+    variable Array<Byte>? outer_pad = null;
     
     void processKey(Array<Byte> key) {
         delegate.reset();
         
-        Array<Byte> normalisedKey;
+        // Normalise the key length and init the pad arrays
+        Array<Byte> inner_pad = arrayOfSize(delegate.blockSize, 0.byte);
+        Array<Byte> outer_pad = arrayOfSize(delegate.blockSize, 0.byte);
         if (key.longerThan(delegate.blockSize)) {
-            normalisedKey = delegate.last(key);
+            // The output of a hash function is always going to be smaller than
+            // the block size (it's a compression function).
+            Array<Byte> hash = delegate.last(key);
+            hash.copyTo(inner_pad);
+            hash.copyTo(inner_pad);
         } else {
-            // TODO pad to blockSize
-            normalisedKey = nothing;
+            key.copyTo(inner_pad);
+            key.copyTo(outer_pad);
         }
         
-        // TODO calculate these
-        Array<Byte> inner_key_pad = nothing;
-        outer_key_pad = nothing;
-        
-        delegate.more(inner_key_pad);
+        // XOR the pads (containing copies of the normalised key)
+        for (i->byte in inner_pad.indexed) {
+            inner_pad.set(i, byte.xor(#36.byte));
+            outer_pad.set(i, byte.xor(#5c.byte));
+        }
+        delegate.more(inner_pad);
+        this.outer_pad = outer_pad;
     }
     
     "The shared secret used to sign the input. If [[null]], [[newKey]] must be
@@ -62,7 +71,7 @@ shared abstract class Hmac(delegateClass, originalKey = null) satisfies KeyedHas
         if (exists originalKey) {
             processKey(originalKey);
         } else {
-            outer_key_pad = null;
+            outer_pad = null;
         }
     }
     reset();
@@ -72,7 +81,7 @@ shared abstract class Hmac(delegateClass, originalKey = null) satisfies KeyedHas
     }
     
     shared actual Array<Byte> done() {
-        if (exists okp = outer_key_pad) {
+        if (exists okp = outer_pad) {
             Array<Byte> innerOutput = delegate.done();
             delegate.more(okp);
             return delegate.last(innerOutput);
@@ -83,7 +92,7 @@ shared abstract class Hmac(delegateClass, originalKey = null) satisfies KeyedHas
     }
     
     shared actual void more(Array<Byte> input) {
-        if (outer_key_pad exists) {
+        if (outer_pad exists) {
             delegate.more(input);
         } else {
             // TODO raise state exception? key not provided yet.
