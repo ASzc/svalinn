@@ -22,6 +22,10 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
     
     variable Array<Byte>? blockRemainder = null;
     
+    // TODO should be padding function be done in the compressor class rather than MD? If so, might have to reorg types.
+    // TODO ^^^ depends on how different the implementations need to be?
+    // TODO ^^^ maybe have a seperate type for the different styles of MD-compliant padding
+    // TODO     pass a metaref in from concrete, like the compressor is passed in? 
     "Perform Merkle–Damgård compliant padding of an incomplete block."
     Array<Byte> strengthen(Array<Byte> incomplete) { // TODO right name?? pad?
         return nothing;
