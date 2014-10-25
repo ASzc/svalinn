@@ -22,16 +22,48 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
     
     variable Array<Byte>? blockRemainder = null;
     
-    // TODO should be padding function be done in the compressor class rather than MD? If so, might have to reorg types.
-    // TODO ^^^ depends on how different the implementations need to be?
-    // TODO ^^^ maybe have a seperate type for the different styles of MD-compliant padding
-    // TODO     pass a metaref in from concrete, like the compressor is passed in? 
-    "Perform Merkle–Damgård compliant padding of an incomplete block."
-    Array<Byte> strengthen(Array<Byte> incomplete) { // TODO right name?? pad?
-        return nothing;
+    "Perform Merkle–Damgård compliant padding of the final block. Returns
+     an array of size [[blockSize]] or [[blockSize]] * 2."
+    Array<Byte> strengthen(Array<Byte> final) {
+        "The size with the terminating '1' bit."
+        Integer terminatedSize = final.size + 1;
+        "The size of the length suffix seems to hold as the byte block size
+         cast to bits. A 64 byte block size would have a 64 bit suffix."
+        Integer lengthSuffixByteSize = (blockSize / 8);
+        
+        "Either one or two blocks"
+        Integer paddedSize;
+        if (terminatedSize > blockSize - lengthSuffixByteSize) {
+            paddedSize = blockSize * 2;
+        } else {
+            paddedSize = blockSize;
+        }
+        Array<Byte> padded = arrayOfSize(paddedSize, 0.byte);
+        final.copyTo(padded);
+        
+        "The position of the terminator bit within the terminator byte."
+        Integer termPosition = terminatedSize.remainder(8);
+        "If [[final]] is a whole block, then the terminator bit is in a new,
+         appended, block."
+        Integer termByteIndex;
+        if (termPosition == 0) {
+            termByteIndex = terminatedSize.divided(8) + 1;
+        } else {
+            termByteIndex = terminatedSize.divided(8);
+        }
+        Byte? termByte = padded.get(termByteIndex);
+        assert (exists termByte);
+        padded.set(termByteIndex, termByte.set(termPosition, true));
+        
+        // TODO calc offset to start of length? (zeros already there)
+        
+        // TODO append length as truncated lengthSuffixByteSize bytes
+        
+        return padded;
     }
     
     shared actual Array<Byte> done() {
+        // TODO this needs to be redone (?) / checked to account for all messages being padded (even complete ones)
         if (exists br = blockRemainder) {
             delegate.compress(strengthen(br));
         }

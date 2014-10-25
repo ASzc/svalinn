@@ -3,7 +3,7 @@ import ca.szc.svalinn {
 }
 
 shared class Sha1Compressor() satisfies FixedInputCompressor {
-    shared actual Integer blockSize => nothing;
+    shared actual Integer blockSize => 64;
     
     shared actual void compress(Array<Byte> input) {}
     
