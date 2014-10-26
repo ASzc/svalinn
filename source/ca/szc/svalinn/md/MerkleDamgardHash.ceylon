@@ -22,6 +22,10 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
     
     variable Array<Byte>? blockRemainder = null;
     
+    variable Integer blockCount = 0;
+    
+    // If this needs to have multiple implementations in the future, pass in a
+    // delegate Class reference for that. Same method as the FIC class.
     "Perform Merkle–Damgård compliant padding of the final block. Returns
      an array of size [[blockSize]] or [[blockSize]] * 2."
     Array<Byte> strengthen(Array<Byte> final) {
@@ -55,17 +59,21 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
         assert (exists termByte);
         padded.set(termByteIndex, termByte.set(termPosition, true));
         
-        // TODO calc offset to start of length? (zeros already there)
-        
-        // TODO append length as truncated lengthSuffixByteSize bytes
+        Integer messageLength = final.size + blockCount * blockSize;
+        Integer lengthSuffixStart = paddedSize - lengthSuffixByteSize;
+        for (i in 0..lengthSuffixByteSize) {
+            padded.set(lengthSuffixStart + i, messageLength.rightLogicalShift(lengthSuffixByteSize - i).byte);
+        }
         
         return padded;
     }
     
     shared actual Array<Byte> done() {
         // TODO this needs to be redone (?) / checked to account for all messages being padded (even complete ones)
+        // TODO might change br to contain the most recent complete block as well?
         if (exists br = blockRemainder) {
             delegate.compress(strengthen(br));
+            blockCount++;
         }
         return delegate.done();
     }
@@ -85,6 +93,7 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
                 br.copyTo(blockBuffer);
                 input.copyTo(blockBuffer, 0, br.size, minimumInput);
                 delegate.compress(blockBuffer);
+                blockCount++;
                 readInput = minimumInput;
             }
         } else {
@@ -95,6 +104,7 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
         variable Integer remaining = input.size - readInput;
         while (remaining >= blockSize) {
             delegate.compress(input[endOfPrevBlock:blockSize]);
+            blockCount++;
             endOfPrevBlock += blockSize;
             remaining -= blockSize;
         }
