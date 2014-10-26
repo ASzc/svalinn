@@ -20,9 +20,15 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
     
     shared actual Integer outputSize => delegate.outputSize;
     
-    variable Array<Byte>? blockRemainder = null;
+    variable Array<Byte> latentBlock = Array<Byte> { };
     
     variable Integer blockCount = 0;
+    
+    shared actual void reset() {
+        latentBlock = Array<Byte> { };
+        blockCount = 0;
+        delegate.reset();
+    }
     
     // If this needs to have multiple implementations in the future, pass in a
     // delegate Class reference for that. Same method as the FIC class.
@@ -69,54 +75,52 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
     }
     
     shared actual Array<Byte> done() {
-        // TODO this needs to be redone (?) / checked to account for all messages being padded (even complete ones)
-        // TODO might change br to contain the most recent complete block as well?
-        if (exists br = blockRemainder) {
-            delegate.compress(strengthen(br));
-            blockCount++;
-        }
+        delegate.compress(strengthen(latentBlock));
+        blockCount++;
         return delegate.done();
     }
     
     shared actual void more(Array<Byte> input) {
-        Integer readInput;
-        if (exists br = blockRemainder) {
-            Integer minimumInput = blockSize - br.size;
-            if (input.size < minimumInput) {
-                Array<Byte> blockBuffer = arrayOfSize(br.size + input.size, 0.byte);
-                br.copyTo(blockBuffer);
-                input.copyTo(blockBuffer, 0, br.size, minimumInput);
-                blockRemainder = blockBuffer;
-                return;
-            } else {
-                Array<Byte> blockBuffer = arrayOfSize(blockSize, 0.byte);
-                br.copyTo(blockBuffer);
-                input.copyTo(blockBuffer, 0, br.size, minimumInput);
-                delegate.compress(blockBuffer);
+        if (input.size > 0) {
+            // Have to make this variable to satisfy the compiler
+            variable Integer inputTaken = 0;
+            if (latentBlock.size == blockSize) {
+                delegate.compress(latentBlock);
                 blockCount++;
-                readInput = minimumInput;
+                latentBlock = Array<Byte> { };
+            } else if (latentBlock.size > 0) {
+                Integer latentGap = blockSize - latentBlock.size;
+                if (input.size <= latentGap) {
+                    Integer concatSize = latentBlock.size + input.size;
+                    Array<Byte> newLatentBlock = arrayOfSize(concatSize, 0.byte);
+                    latentBlock.copyTo(newLatentBlock);
+                    input.copyTo(newLatentBlock, 0, latentBlock.size);
+                    latentBlock = newLatentBlock;
+                    return;
+                } else {
+                    Array<Byte> block = arrayOfSize(blockSize, 0.byte);
+                    latentBlock.copyTo(block);
+                    input.copyTo(block, 0, latentBlock.size, latentGap);
+                    delegate.compress(block);
+                    blockCount++;
+                    latentBlock = Array<Byte> { };
+                    inputTaken = latentGap;
+                }
             }
-        } else {
-            readInput = 0;
+            
+            variable Integer endOfPrevBlock = inputTaken;
+            variable Integer remaining = input.size - inputTaken;
+            while (remaining > blockSize) {
+                delegate.compress(input[endOfPrevBlock:blockSize]);
+                blockCount++;
+                endOfPrevBlock += blockSize;
+                remaining -= blockSize;
+            }
+            if (remaining > 0) {
+                latentBlock = input[endOfPrevBlock:remaining];
+            } else {
+                latentBlock = Array<Byte> { };
+            }
         }
-        
-        variable Integer endOfPrevBlock = readInput;
-        variable Integer remaining = input.size - readInput;
-        while (remaining >= blockSize) {
-            delegate.compress(input[endOfPrevBlock:blockSize]);
-            blockCount++;
-            endOfPrevBlock += blockSize;
-            remaining -= blockSize;
-        }
-        if (remaining > 0) {
-            blockRemainder = input[endOfPrevBlock:remaining];
-        } else {
-            blockRemainder = null;
-        }
-    }
-    
-    shared actual void reset() {
-        blockRemainder = null;
-        delegate.reset();
     }
 }
