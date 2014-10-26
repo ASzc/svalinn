@@ -55,6 +55,9 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         
         // TODO have to move the leftmost bit of each byte to the rightmost bit of the byte on the left (mod a.size) ???
         
+        // TODO convert to/from single array of booleans?
+        // TODO should the internal representation for this class always be an array of booleans ("Word")?
+        
         // #define SHA1CircularShift(bits,word) (((word) << (bits)) | ((word) >> (32-(bits))))
         
         return Array<Byte> {
@@ -65,17 +68,11 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
     shared actual void compress(Array<Byte> input) {
         Integer wordSize = 4;
         
-        //Array<Array<Byte>> w = Array<Array<Byte>> {
-        //    {for (i in 0:15) arrayOfSize(wordSize, 0.byte)}.chain(
-        //    {for (i in 16:79) arrayOfSize(wordSize, 0.byte)});
-        //};
-        
         Array<Array<Byte>> w = Array<Array<Byte>> {
-            { for (i in 0:15) input[i * wordSize : wordSize] }.chain(
-                { for (i in 16:79) arrayOfSize(wordSize, 0.byte) });
+            { for (i in 0:16) input[i * wordSize : wordSize] }.chain(
+                { for (i in 16:80) arrayOfSize(wordSize, 0.byte) });
         };
-        for (i in 16:79) {
-            // (w[i-3] xor w[i-8] xor w[i-14] xor w[i-16]) leftrotate 1
+        for (i in 16:80) {
             Array<Byte>? m3 = w[i - 3];
             Array<Byte>? m8 = w[i - 8];
             Array<Byte>? m14 = w[i - 14];
@@ -90,6 +87,24 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         Array<Byte> c = h2.clone();
         Array<Byte> d = h3.clone();
         Array<Byte> e = h4.clone();
+        
+        
+        
+        for (i in 0:20) {
+            // TODO
+        }
+        
+        for (i in 20:40) {
+            // TODO
+        }
+        
+        for (i in 40:60) {
+            // TODO
+        }
+        
+        for (i in 60:80) {
+            // TODO
+        }
         
         // TODO
     }
