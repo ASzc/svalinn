@@ -77,7 +77,12 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
     }
     
     shared actual Array<Byte> done() {
-        compress(strengthen(latentBlock));
+        Array<Byte> finalBlocks = strengthen(latentBlock);
+        variable Integer endOfPrevBlock = 0;
+        while (endOfPrevBlock < finalBlocks.size) {
+            compress(finalBlocks[endOfPrevBlock:blockSize]);
+            endOfPrevBlock += blockSize;
+        }
         return delegate.done();
     }
     
