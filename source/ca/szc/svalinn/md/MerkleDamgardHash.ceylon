@@ -15,19 +15,21 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
     
     "The encapsulated instance of [[delegateClass]]."
     FixedInputCompressor delegate = delegateClass();
-    
     shared actual Integer blockSize => delegate.blockSize;
-    
     shared actual Integer outputSize => delegate.outputSize;
     
     variable Array<Byte> latentBlock = Array<Byte> { };
-    
     variable Integer blockCount = 0;
     
     shared actual void reset() {
         latentBlock = Array<Byte> { };
         blockCount = 0;
         delegate.reset();
+    }
+    
+    void compress(Array<Byte> block) {
+        delegate.compress(block);
+        blockCount++;
     }
     
     // If this needs to have multiple implementations in the future, pass in a
@@ -75,8 +77,7 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
     }
     
     shared actual Array<Byte> done() {
-        delegate.compress(strengthen(latentBlock));
-        blockCount++;
+        compress(strengthen(latentBlock));
         return delegate.done();
     }
     
@@ -85,8 +86,7 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
             // Have to make this variable to satisfy the compiler
             variable Integer inputTaken = 0;
             if (latentBlock.size == blockSize) {
-                delegate.compress(latentBlock);
-                blockCount++;
+                compress(latentBlock);
                 latentBlock = Array<Byte> { };
             } else if (latentBlock.size > 0) {
                 Integer latentGap = blockSize - latentBlock.size;
@@ -101,8 +101,7 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
                     Array<Byte> block = arrayOfSize(blockSize, 0.byte);
                     latentBlock.copyTo(block);
                     input.copyTo(block, 0, latentBlock.size, latentGap);
-                    delegate.compress(block);
-                    blockCount++;
+                    compress(block);
                     latentBlock = Array<Byte> { };
                     inputTaken = latentGap;
                 }
@@ -111,8 +110,7 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
             variable Integer endOfPrevBlock = inputTaken;
             variable Integer remaining = input.size - inputTaken;
             while (remaining > blockSize) {
-                delegate.compress(input[endOfPrevBlock:blockSize]);
-                blockCount++;
+                compress(input[endOfPrevBlock:blockSize]);
                 endOfPrevBlock += blockSize;
                 remaining -= blockSize;
             }
