@@ -59,7 +59,7 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
         assert (exists termByte);
         padded.set(termByteIndex, termByte.set(termPosition, true));
         
-        Integer messageLength = final.size + blockCount * blockSize;
+        Integer messageLength = 8 * (final.size + blockCount * blockSize);
         Integer lengthSuffixStart = paddedSize - lengthSuffixByteSize;
         for (i in 0..lengthSuffixByteSize) {
             padded.set(lengthSuffixStart + i, messageLength.rightLogicalShift(lengthSuffixByteSize - i).byte);
