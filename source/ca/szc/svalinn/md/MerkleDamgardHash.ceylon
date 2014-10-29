@@ -37,43 +37,54 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
     "Perform Merkle–Damgård compliant padding of the final block. Returns
      an array of size [[blockSize]] or [[blockSize]] * 2."
     Array<Byte> strengthen(Array<Byte> final) {
-        "The size with the terminating '1' bit."
-        Integer terminatedSize = final.size + 1;
+        assert (final.size <= blockSize);
+        "The size of [[final]] in bits with the terminating '1' bit."
+        Integer termBitSize = final.size + 1;
+        
         "The size of the length suffix seems to hold as the byte block size
          cast to bits. A 64 byte block size would have a 64 bit suffix."
-        Integer lengthSuffixByteSize = (blockSize / 8);
+        // Note the miniumum guaranteed capacity of the Integer class is only 32 bits
+        Integer lengthSuffixBitSize = blockSize;
         
-        "Either one or two blocks"
-        Integer paddedSize;
-        if (terminatedSize > blockSize - lengthSuffixByteSize) {
-            paddedSize = blockSize * 2;
-        } else {
-            paddedSize = blockSize;
-        }
-        Array<Byte> padded = arrayOfSize(paddedSize, 0.byte);
-        final.copyTo(padded);
+        Integer blockBitSize = blockSize * 8;
         
-        "The position of the terminator bit within the terminator byte."
-        Integer termPosition = terminatedSize.remainder(8);
-        "If [[final]] is a whole block, then the terminator bit is in a new,
-         appended, block."
-        Integer termByteIndex;
-        if (termPosition == 0) {
-            termByteIndex = terminatedSize.divided(8) + 1;
+        "Either one or two blocks worth. The minimum needed to fit the
+         terminated message and the length value suffix."
+        Integer paddedByteSize;
+        if (termBitSize + lengthSuffixBitSize > blockBitSize) {
+            paddedByteSize = blockSize * 2;
         } else {
-            termByteIndex = terminatedSize.divided(8);
+            paddedByteSize = blockSize;
         }
-        Byte? termByte = padded.get(termByteIndex);
+        Array<Byte> paddedFinal = arrayOfSize(paddedByteSize, 0.byte);
+        
+        // Copy in final to beginning
+        final.copyTo(paddedFinal);
+        
+        "The position of the the terminating '1' bit within the terminator byte."
+        Integer termPosition = termBitSize.remainder(8);
+        "The index of the terminator byte."
+        Integer termByteIndex = termBitSize.divided(8);
+        
+        // Get the bits already in the terminating byte, then set the
+        // terminator bit in a copy of that byte that replaces the original.
+        Byte? termByte = paddedFinal.get(termByteIndex);
         assert (exists termByte);
-        padded.set(termByteIndex, termByte.set(termPosition, true));
+        paddedFinal.set(termByteIndex, termByte.set(termPosition, true));
         
-        Integer messageLength = 8 * (final.size + blockCount * blockSize);
-        Integer lengthSuffixStart = paddedSize - lengthSuffixByteSize;
-        for (i in 0..lengthSuffixByteSize) {
-            padded.set(lengthSuffixStart + i, messageLength.rightLogicalShift(8*(lengthSuffixByteSize - i)).byte.and($11111111.byte));
+        "The total unterminated message size in bits."
+        Integer messageBitSize = 8 * (final.size + (blockCount * blockSize));
+        
+        // Compensate for the limited size of Integer
+        Integer runtimeResDiff = lengthSuffixBitSize - runtime.integerAddressableSize;
+        // Serialise the Integer into bits and set them in sequence
+        Integer lengthSuffixStart = (paddedByteSize * 8) - lengthSuffixBitSize + runtimeResDiff;
+        for (i in 0..runtime.integerAddressableSize) {
+            Byte bit = messageBitSize.rightLogicalShift(lengthSuffixBitSize - i).byte.and($1.byte);
+            paddedFinal.set(lengthSuffixStart + i, bit);
         }
         
-        return padded;
+        return paddedFinal;
     }
     
     shared actual Array<Byte> done() {
