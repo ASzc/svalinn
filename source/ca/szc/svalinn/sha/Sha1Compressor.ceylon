@@ -58,6 +58,8 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         // TODO convert to/from single array of booleans?
         // TODO should the internal representation for this class always be an array of booleans ("Word")?
         
+        // TODO risk the Integer type?
+        
         // #define SHA1CircularShift(bits,word) (((word) << (bits)) | ((word) >> (32-(bits))))
         
         return Array<Byte> {
@@ -119,4 +121,18 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         reset();
         return output;
     }
+}
+
+shared void bitDemo() {
+    print(runtime.integerSize);
+    Integer intSizeGuess = 32;
+    //Integer x = $1010000000000000000000000000000000000000000000000000000000000000;
+    Integer x = $00001101;
+    Integer y = 13;
+    print(x);
+    print(y);
+    Integer shift = 30;
+    Integer xCircularShiftedLeft = x.leftLogicalShift(shift).or(x.rightLogicalShift(intSizeGuess-shift));
+    {Integer*} bits = [for (i in 0..intSizeGuess-1) xCircularShiftedLeft.rightLogicalShift(intSizeGuess-i).and($00000001)];
+    print("".join(bits));
 }
