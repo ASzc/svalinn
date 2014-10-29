@@ -53,13 +53,6 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         Byte? leftmostByte = a[0];
         assert (exists leftmostByte);
         
-        // TODO have to move the leftmost bit of each byte to the rightmost bit of the byte on the left (mod a.size) ???
-        
-        // TODO convert to/from single array of booleans?
-        // TODO should the internal representation for this class always be an array of booleans ("Word")?
-        
-        // TODO risk the Integer type?
-        
         // #define SHA1CircularShift(bits,word) (((word) << (bits)) | ((word) >> (32-(bits))))
         
         return Array<Byte> {
@@ -69,6 +62,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
     
     shared actual void compress(Array<Byte> input) {
         Integer wordSize = 4;
+        // TODO Integers are at least 32 bits on JS and JVM, so use them for now
         
         Array<Array<Byte>> w = Array<Array<Byte>> {
             { for (i in 0:16) input[i * wordSize : wordSize] }.chain(
