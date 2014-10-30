@@ -6,58 +6,28 @@ import ca.szc.svalinn {
  [FIPS-180-4](http://csrc.nist.gov/publications/fips/fips180-4/fips-180-4.pdf)
  SHA-1."
 shared class Sha1Compressor() satisfies FixedInputCompressor {
-    Array<Byte> h0 = arrayOfSize(4, 0.byte);
-    Array<Byte> h1 = arrayOfSize(4, 0.byte);
-    Array<Byte> h2 = arrayOfSize(4, 0.byte);
-    Array<Byte> h3 = arrayOfSize(4, 0.byte);
-    Array<Byte> h4 = arrayOfSize(4, 0.byte);
+    // Integer is at least 32 bit length on both JVM and JS
+    Integer wordBitSize = 32;
+    variable Integer h0 = #67_45_23_01;
+    variable Integer h1 = #EF_CD_AB_89;
+    variable Integer h2 = #98_BA_DC_FE;
+    variable Integer h3 = #10_32_54_76;
+    variable Integer h4 = #C3_D2_E1_F0;
     
     shared actual Integer blockSize = 64;
     shared actual Integer outputSize = 5 * 4;
     
     shared actual void reset() {
         // Magic initial values as defined in the spec
-        h0.set(0, #67.byte);
-        h0.set(1, #45.byte);
-        h0.set(2, #23.byte);
-        h0.set(3, #01.byte);
-        
-        h1.set(0, #EF.byte);
-        h1.set(1, #CD.byte);
-        h1.set(2, #AB.byte);
-        h1.set(3, #89.byte);
-        
-        h2.set(0, #98.byte);
-        h2.set(1, #BA.byte);
-        h2.set(2, #DC.byte);
-        h2.set(3, #FE.byte);
-        
-        h3.set(0, #10.byte);
-        h3.set(1, #32.byte);
-        h3.set(2, #54.byte);
-        h3.set(3, #76.byte);
-        
-        h4.set(0, #C3.byte);
-        h4.set(1, #D2.byte);
-        h4.set(2, #E1.byte);
-        h4.set(3, #F0.byte);
+        h0 = #67_45_23_01;
+        h1 = #EF_CD_AB_89;
+        h2 = #98_BA_DC_FE;
+        h3 = #10_32_54_76;
+        h4 = #C3_D2_E1_F0;
     }
-    reset();
     
-    Array<Byte> xor(Array<Byte> a, Array<Byte> b) {
-        return Array<Byte> {
-            for (aByte->bByte in zipEntries(a, b)) aByte.xor(bByte)
-        };
-    }
-    Array<Byte> circularShiftLeft(Array<Byte> a) {
-        Byte? leftmostByte = a[0];
-        assert (exists leftmostByte);
-        
-        // #define SHA1CircularShift(bits,word) (((word) << (bits)) | ((word) >> (32-(bits))))
-        
-        return Array<Byte> {
-            //TODO
-        };
+    Integer circularShiftLeft(Integer bits, Integer shiftAmount) {
+        return bits.leftLogicalShift(shiftAmount).or(bits.rightLogicalShift(wordBitSize - shiftAmount));
     }
     
     shared actual void compress(Array<Byte> input) {
@@ -83,8 +53,6 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         Array<Byte> c = h2.clone();
         Array<Byte> d = h3.clone();
         Array<Byte> e = h4.clone();
-        
-        
         
         for (i in 0:20) {
             // TODO
@@ -126,7 +94,7 @@ shared void bitDemo() {
     print(x);
     print(y);
     Integer shift = 30;
-    Integer xCircularShiftedLeft = x.leftLogicalShift(shift).or(x.rightLogicalShift(intSizeGuess-shift));
-    {Integer*} bits = [for (i in 0..intSizeGuess-1) xCircularShiftedLeft.rightLogicalShift(intSizeGuess-i).and($00000001)];
+    Integer xCircularShiftedLeft = x.leftLogicalShift(shift).or(x.rightLogicalShift(intSizeGuess - shift));
+    {Integer*} bits = [for (i in 0 .. intSizeGuess - 1) xCircularShiftedLeft.rightLogicalShift(intSizeGuess - i).and($00000001)];
     print("".join(bits));
 }

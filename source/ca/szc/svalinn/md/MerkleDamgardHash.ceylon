@@ -79,6 +79,8 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
         Integer runtimeResDiff = lengthSuffixBitSize - runtime.integerAddressableSize;
         // Serialise the Integer into bits and set them in sequence
         Integer lengthSuffixStart = (paddedByteSize * 8) - lengthSuffixBitSize + runtimeResDiff;
+        // TODO this doesn't quite work, as paddedFinal is of one or two times blockSize Bytes, not some bits.
+        // TODO ^^^ probably need to do some reading of bytes / use termByte/termByteIndex?
         for (i in 0..runtime.integerAddressableSize) {
             Byte bit = messageBitSize.rightLogicalShift(lengthSuffixBitSize - i).byte.and($1.byte);
             paddedFinal.set(lengthSuffixStart + i, bit);
