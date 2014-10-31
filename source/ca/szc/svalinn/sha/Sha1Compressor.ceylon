@@ -9,7 +9,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
     // Integer is at least 32 bit length on both JVM and JS
     Integer wordBitSize = 32;
     // Should yield a binary mask of all 1 bits, of length wordBitSize
-    Integer circularShiftMask = {for (x in 0..wordBitSize) 2^x}.fold(0)(plus<Integer>);
+    Integer circularShiftMask = { for (x in 0..wordBitSize) 2 ^ x }.fold(0)(plus<Integer>);
     
     // Constants
     Integer k0 = #5A_82_79_99;
@@ -130,13 +130,23 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         h4 += e;
     }
     
+    Array<Byte> wordToBytes(Integer word) {
+        Array<Byte> bytes = arrayOfSize(4, 0.byte);
+        for (i in 0:4) {
+            bytes.set(i, word.rightLogicalShift(i * 8).and($1111_1111).byte);
+        }
+        return bytes;
+    }
+    
     shared actual Array<Byte> done() {
         Array<Byte> output = arrayOfSize(outputSize, 0.byte);
-        h0.copyTo(output, 0, 4 * 0);
-        h1.copyTo(output, 0, 4 * 1);
-        h2.copyTo(output, 0, 4 * 2);
-        h3.copyTo(output, 0, 4 * 3);
-        h4.copyTo(output, 0, 4 * 4);
+        
+        wordToBytes(h0).copyTo(output, 0, 4 * 0);
+        wordToBytes(h1).copyTo(output, 0, 4 * 1);
+        wordToBytes(h2).copyTo(output, 0, 4 * 2);
+        wordToBytes(h3).copyTo(output, 0, 4 * 3);
+        wordToBytes(h4).copyTo(output, 0, 4 * 4);
+        
         reset();
         return output;
     }
