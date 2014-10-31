@@ -8,6 +8,8 @@ import ca.szc.svalinn {
 shared class Sha1Compressor() satisfies FixedInputCompressor {
     // Integer is at least 32 bit length on both JVM and JS
     Integer wordBitSize = 32;
+    // Should yield a binary mask of all 1 bits, of length wordBitSize
+    Integer circularShiftMask = {for (x in 0..wordBitSize) 2^x}.fold(0)(plus<Integer>);
     
     // Constants
     Integer k0 = #5A_82_79_99;
@@ -35,8 +37,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
     }
     
     Integer circularShiftLeft(Integer bits, Integer shiftAmount) {
-        // TODO is an AND mask required?
-        return bits.leftLogicalShift(shiftAmount).or(bits.rightLogicalShift(wordBitSize - shiftAmount));
+        return bits.leftLogicalShift(shiftAmount).or(bits.rightLogicalShift(wordBitSize - shiftAmount)).and(circularShiftMask);
     }
     
     shared actual void compress(Array<Byte> input) {
@@ -47,23 +48,18 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         
         // Convert 64 byte input block into 16 32-bit/4-byte Integers
         for (i in 0:16) {
-            // TODO grab 4 bytes into one Integer in sequence
+            Byte? b1 = input.get(i * 4 + 0);
+            Byte? b2 = input.get(i * 4 + 1);
+            Byte? b3 = input.get(i * 4 + 2);
+            Byte? b4 = input.get(i * 4 + 3);
+            assert (exists b1, exists b2, exists b3, exists b4);
             
+            Integer i1 = b1.unsigned.leftLogicalShift(24);
+            Integer i2 = b2.unsigned.leftLogicalShift(16);
+            Integer i3 = b3.unsigned.leftLogicalShift(8);
+            Integer i4 = b4.unsigned;
             
-            //Integer wordSize = 4;
-            //
-            //Array<Array<Byte>> w = Array<Array<Byte>> {
-            //    { for (i in 0:16) input[i * wordSize : wordSize] }.chain(
-            //        { for (i in 16:80) arrayOfSize(wordSize, 0.byte) });
-            //};
-            
-            //for(t = 0; t < 16; t++)
-            //{
-            //    W[t] = context->Message_Block[t * 4] << 24;
-            //    W[t] |= context->Message_Block[t * 4 + 1] << 16;
-            //    W[t] |= context->Message_Block[t * 4 + 2] << 8;
-            //    W[t] |= context->Message_Block[t * 4 + 3];
-            //}
+            words.set(i, i1.or(i2).or(i3).or(i4));
         }
         
         // Expand inital 16 Integers into 80
@@ -85,8 +81,8 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         
         for (i in 0:20) {
             Integer? w = words.get(i);
-            assert(exists w);
-            Integer carry = circularShiftLeft(a,5) + ((b.and(c)).or(b.not.and(d))) + e + w + k0;
+            assert (exists w);
+            Integer carry = circularShiftLeft(a, 5) + ((b.and(c)).or(b.not.and(d))) + e + w + k0;
             e = d;
             d = c;
             c = circularShiftLeft(b, 30);
@@ -95,15 +91,36 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         }
         
         for (i in 20:40) {
-            // TODO
+            Integer? w = words.get(i);
+            assert (exists w);
+            Integer carry = circularShiftLeft(a, 5) + (b.xor(c).xor(d)) + e + w + k1;
+            e = d;
+            d = c;
+            c = circularShiftLeft(b, 30);
+            b = a;
+            a = carry;
         }
         
         for (i in 40:60) {
-            // TODO
+            Integer? w = words.get(i);
+            assert (exists w);
+            Integer carry = circularShiftLeft(a, 5) + ((b.and(c)).or(b.and(d)).or(c.and(d))) + e + w + k2;
+            e = d;
+            d = c;
+            c = circularShiftLeft(b, 30);
+            b = a;
+            a = carry;
         }
         
         for (i in 60:80) {
-            // TODO
+            Integer? w = words.get(i);
+            assert (exists w);
+            Integer carry = circularShiftLeft(a, 5) + (b.xor(c).xor(d)) + e + w + k3;
+            e = d;
+            d = c;
+            c = circularShiftLeft(b, 30);
+            b = a;
+            a = carry;
         }
         
         h0 += a;
