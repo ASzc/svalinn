@@ -36,9 +36,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         h4 = #C3_D2_E1_F0;
     }
     
-    Integer circularShiftLeft(Integer bits, Integer shiftAmount) {
-        return bits.leftLogicalShift(shiftAmount).or(bits.rightLogicalShift(wordBitSize - shiftAmount)).and(circularShiftMask);
-    }
+    Integer(Integer, Integer) circularShiftLeft = circularShiftLeftFor(wordBitSize);
     
     shared actual void compress(Array<Byte> input) {
         assert (input.size == blockSize);
@@ -130,13 +128,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         h4 += e;
     }
     
-    Array<Byte> wordToBytes(Integer word) {
-        Array<Byte> bytes = arrayOfSize(4, 0.byte);
-        for (i in 0:4) {
-            bytes.set(i, word.rightLogicalShift(i * 8).and($1111_1111).byte);
-        }
-        return bytes;
-    }
+    Array<Byte>(Integer) wordToBytes = wordToBytesFor(wordBitSize / 8);
     
     shared actual Array<Byte> done() {
         Array<Byte> output = arrayOfSize(outputSize, 0.byte);
@@ -150,18 +142,4 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         reset();
         return output;
     }
-}
-
-shared void bitDemo() {
-    print(runtime.integerSize);
-    Integer intSizeGuess = 32;
-    //Integer x = $1010000000000000000000000000000000000000000000000000000000000000;
-    Integer x = $00001101;
-    Integer y = 13;
-    print(x);
-    print(y);
-    Integer shift = 30;
-    Integer xCircularShiftedLeft = x.leftLogicalShift(shift).or(x.rightLogicalShift(intSizeGuess - shift));
-    {Integer*} bits = [for (i in 0 .. intSizeGuess - 1) xCircularShiftedLeft.rightLogicalShift(intSizeGuess - i).and($00000001)];
-    print("".join(bits));
 }
