@@ -29,6 +29,7 @@ class CircularShiftLeftTest() {
         assertEquals(csl($11, 1), $110, "3");
         assertEquals(csl($0000_0000_0000_0000_1001_1000_0000_0000, 1), $0000_0000_0000_0001_0011_0000_0000_0000, "Middle 1");
         assertEquals(csl($0010_0000_1111_0000_0000_0000_0000_0010, 1), $0100_0001_1110_0000_0000_0000_0000_0100, "Middle 2");
+        // TODO the following has a spirious failure on JS due to numerical equality not being bitwise equality
         assertEquals(csl($0100_0000_0000_0000_0000_0000_0000_0000, 1), $1000_0000_0000_0000_0000_0000_0000_0000, "Ends 1");
         assertEquals(csl($0000_0000_0000_0000_0000_0000_1111_1111, 1), $0000_0000_0000_0000_0000_0001_1111_1110, "Ends 2");
         assertEquals(csl($1111_1111_0000_0000_0000_0000_0000_0000, 1), $1111_1110_0000_0000_0000_0000_0000_0001, "Ends 3");
