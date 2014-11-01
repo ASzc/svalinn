@@ -47,7 +47,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         Array<Integer> words = arrayOfSize(80, 0);
         
         // Convert 64 byte input block into 16 32-bit/4-byte Integers
-        for (i in 0:16) {
+        for (i in 0..15) {
             Byte? b1 = input.get(i * 4 + 0);
             Byte? b2 = input.get(i * 4 + 1);
             Byte? b3 = input.get(i * 4 + 2);
@@ -63,7 +63,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         }
         
         // Expand inital 16 Integers into 80
-        for (i in 16:80) {
+        for (i in 16..79) {
             Integer? m3 = words[i - 3];
             Integer? m8 = words[i - 8];
             Integer? m14 = words[i - 14];
@@ -79,7 +79,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         variable Integer d = h3;
         variable Integer e = h4;
         
-        for (i in 0:20) {
+        for (i in 0..19) {
             Integer? w = words.get(i);
             assert (exists w);
             Integer carry = circularShiftLeft(a, 5) + ((b.and(c)).or(b.not.and(d))) + e + w + k0;
@@ -90,7 +90,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
             a = carry;
         }
         
-        for (i in 20:40) {
+        for (i in 20..39) {
             Integer? w = words.get(i);
             assert (exists w);
             Integer carry = circularShiftLeft(a, 5) + (b.xor(c).xor(d)) + e + w + k1;
@@ -101,7 +101,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
             a = carry;
         }
         
-        for (i in 40:60) {
+        for (i in 40..59) {
             Integer? w = words.get(i);
             assert (exists w);
             Integer carry = circularShiftLeft(a, 5) + ((b.and(c)).or(b.and(d)).or(c.and(d))) + e + w + k2;
@@ -112,7 +112,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
             a = carry;
         }
         
-        for (i in 60:80) {
+        for (i in 60..79) {
             Integer? w = words.get(i);
             assert (exists w);
             Integer carry = circularShiftLeft(a, 5) + (b.xor(c).xor(d)) + e + w + k3;
