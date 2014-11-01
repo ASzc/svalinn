@@ -22,7 +22,7 @@ import ceylon.language.meta.model {
  tables)."
 shared abstract class Hmac(delegateClass, originalKey) satisfies KeyedVariableInputCompressor {
     "An instance of this is created for use as the HMAC hash algorithm.
-     Technically only [[ca.szc.svalinn.md::MerkleDamgardHash]] and other length
+     Technically only [[MerkleDamgardHash]] and other length
      extension vulnerable constructions need to use HMAC for MACs."
     Class<BlockedVariableInputCompressor,[]> delegateClass;
     
