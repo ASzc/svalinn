@@ -34,20 +34,19 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
     
     // If this needs to have multiple implementations in the future, pass in a
     // delegate Class reference for that. Same method as the FIC class.
-    "Perform Merkle–Damgård compliant padding of the final block. Returns
-     an array of size [[blockSize]] or [[blockSize]] * 2."
+    "Perform Merkle–Damgård compliant padding of the final block. Returns an
+     array of size [[blockSize]] or [[blockSize]] * 2."
     Array<Byte> strengthen(Array<Byte> final) {
         assert (final.size <= blockSize);
         "The size of [[final]] in bits with the terminating '1' bit."
         Integer termBitSize = final.size + 1;
         
         "The size of the length suffix seems to hold as the byte block size
-         cast to bits. A 64 byte block size would have a 64 bit suffix."
-        // Note the miniumum guaranteed capacity of the Integer class is only 32 bits
+         cast to bits. A 64 byte block size would have a 64 bit suffix. Note
+         the miniumum guaranteed capacity of the Integer class is only 32 bits,
+         so this may not reflect the max acceptable message length."
         Integer lengthSuffixBitSize = blockSize;
-        
         Integer blockBitSize = blockSize * 8;
-        
         "Either one or two blocks worth. The minimum needed to fit the
          terminated message and the length value suffix."
         Integer paddedByteSize;
@@ -56,6 +55,8 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
         } else {
             paddedByteSize = blockSize;
         }
+        "The padded version of [[final]] that will be returned. Of size
+         [[paddedByteSize]]."
         Array<Byte> paddedFinal = arrayOfSize(paddedByteSize, 0.byte);
         
         // Copy in final to beginning
@@ -65,25 +66,26 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
         Integer termPosition = termBitSize.remainder(8);
         "The index of the terminator byte."
         Integer termByteIndex = termBitSize.divided(8);
-        
-        // Get the bits already in the terminating byte, then set the
-        // terminator bit in a copy of that byte that replaces the original.
+        "Byte is immutable, so we have to get the existing Byte to modify it
+         and replace it."
         Byte? termByte = paddedFinal.get(termByteIndex);
         assert (exists termByte);
         paddedFinal.set(termByteIndex, termByte.set(termPosition, true));
         
         "The total unterminated message size in bits."
         Integer messageBitSize = 8 * (final.size + (blockCount * blockSize));
-        
-        // Compensate for the limited size of Integer
-        Integer runtimeResDiff = lengthSuffixBitSize - runtime.integerAddressableSize;
-        // Serialise the Integer into bits and set them in sequence
-        Integer lengthSuffixStart = (paddedByteSize * 8) - lengthSuffixBitSize + runtimeResDiff;
-        // TODO this doesn't quite work, as paddedFinal is of one or two times blockSize Bytes, not some bits.
-        // TODO ^^^ probably need to do some reading of bytes / use termByte/termByteIndex?
-        for (i in 0..runtime.integerAddressableSize) {
-            Byte bit = messageBitSize.rightLogicalShift(lengthSuffixBitSize - i).byte.and($1.byte);
-            paddedFinal.set(lengthSuffixStart + i, bit);
+        "The Integer representation byte size. Should be 8 on JVM (64-bit) and
+         4 on JS (32-bit)."
+        Integer intAddrByteSize = runtime.integerAddressableSize / 8;
+        "The first byte of the length bits, as an offset from the right hand
+         side. Really this should use [[lengthSuffixBitSize]], but the Integer
+         class might not be of that size. This alternate offset is safe since
+         the array starts as all zeros."
+        Integer lengthSuffixStartByte = paddedByteSize - intAddrByteSize;
+        // Serialise the Integer a Byte at a time
+        for (i in 0:intAddrByteSize) {
+            Byte byte = messageBitSize.rightLogicalShift((intAddrByteSize - i) * 8).and($1111_1111).byte;
+            paddedFinal.set(lengthSuffixStartByte + i, byte);
         }
         
         return paddedFinal;
