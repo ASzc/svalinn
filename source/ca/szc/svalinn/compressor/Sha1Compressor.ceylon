@@ -8,8 +8,6 @@ import ca.szc.svalinn {
 shared class Sha1Compressor() satisfies FixedInputCompressor {
     // Integer is at least 32 bit length on both JVM and JS
     Integer wordBitSize = 32;
-    // Should yield a binary mask of all 1 bits, of length wordBitSize
-    Integer circularShiftMask = { for (x in 0..wordBitSize) 2 ^ x }.fold(0)(plus<Integer>);
     
     // Constants
     Integer k0 = #5A_82_79_99;

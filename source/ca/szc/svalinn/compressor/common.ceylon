@@ -10,3 +10,7 @@ shared Integer circularShiftLeftFor(Integer wordBitSize)(Integer bits, Integer s
     Integer circularShiftMask = { for (x in 0:wordBitSize) 2 ^ x }.fold(0)(plus<Integer>);
     return bits.leftLogicalShift(shiftAmount).or(bits.rightLogicalShift(wordBitSize - shiftAmount)).and(circularShiftMask);
 }
+
+shared Boolean bitwiseEquals(Integer a, Integer b) {
+    return a.xor(b) == 0;
+}

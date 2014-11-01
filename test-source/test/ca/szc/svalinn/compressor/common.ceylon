@@ -1,6 +1,7 @@
 import ca.szc.svalinn.compressor {
     wordToBytesFor,
-    circularShiftLeftFor
+    circularShiftLeftFor,
+    bitwiseEquals
 }
 import ceylon.test {
     test,
@@ -22,17 +23,24 @@ class WordToBytesTest() {
 class CircularShiftLeftTest() {
     test
     shared void fourByteShift1() {
+        Boolean be(Anything a, Anything b) {
+            if (is Integer a, is Integer b) {
+                return bitwiseEquals(a, b);
+            } else {
+                return false;
+            }
+        }
+        
         Integer(Integer, Integer) csl = circularShiftLeftFor(32);
-        assertEquals(csl($0, 1), $0, "0");
-        assertEquals(csl($1, 1), $10, "1");
-        assertEquals(csl($10, 1), $100, "2");
-        assertEquals(csl($11, 1), $110, "3");
-        assertEquals(csl($0000_0000_0000_0000_1001_1000_0000_0000, 1), $0000_0000_0000_0001_0011_0000_0000_0000, "Middle 1");
-        assertEquals(csl($0010_0000_1111_0000_0000_0000_0000_0010, 1), $0100_0001_1110_0000_0000_0000_0000_0100, "Middle 2");
-        // TODO the following has a spirious failure on JS due to numerical equality not being bitwise equality
-        assertEquals(csl($0100_0000_0000_0000_0000_0000_0000_0000, 1), $1000_0000_0000_0000_0000_0000_0000_0000, "Ends 1");
-        assertEquals(csl($0000_0000_0000_0000_0000_0000_1111_1111, 1), $0000_0000_0000_0000_0000_0001_1111_1110, "Ends 2");
-        assertEquals(csl($1111_1111_0000_0000_0000_0000_0000_0000, 1), $1111_1110_0000_0000_0000_0000_0000_0001, "Ends 3");
-        assertEquals(csl($1100_0000_0000_0000_0000_0000_0000_0001, 1), $1000_0000_0000_0000_0000_0000_0000_0011, "Ends 4");
+        assertEquals(csl($0, 1), $0, "0", be);
+        assertEquals(csl($1, 1), $10, "1", be);
+        assertEquals(csl($10, 1), $100, "2", be);
+        assertEquals(csl($11, 1), $110, "3", be);
+        assertEquals(csl($0000_0000_0000_0000_1001_1000_0000_0000, 1), $0000_0000_0000_0001_0011_0000_0000_0000, "Middle 1", be);
+        assertEquals(csl($0010_0000_1111_0000_0000_0000_0000_0010, 1), $0100_0001_1110_0000_0000_0000_0000_0100, "Middle 2", be);
+        assertEquals(csl($0100_0000_0000_0000_0000_0000_0000_0000, 1), $1000_0000_0000_0000_0000_0000_0000_0000, "Ends 1", be);
+        assertEquals(csl($0000_0000_0000_0000_0000_0000_1111_1111, 1), $0000_0000_0000_0000_0000_0001_1111_1110, "Ends 2", be);
+        assertEquals(csl($1111_1111_0000_0000_0000_0000_0000_0000, 1), $1111_1110_0000_0000_0000_0000_0000_0001, "Ends 3", be);
+        assertEquals(csl($1100_0000_0000_0000_0000_0000_0000_0001, 1), $1000_0000_0000_0000_0000_0000_0000_0011, "Ends 4", be);
     }
 }
