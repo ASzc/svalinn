@@ -75,6 +75,8 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         variable Integer d = h3;
         variable Integer e = h4;
         
+        String fH(Integer x) => formatInteger(x, 16);
+        
         for (i in 0..19) {
             Integer? w = words.get(i);
             assert (exists w);
@@ -84,6 +86,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
             c = circularShiftLeft(b, 30);
             b = a;
             a = carry;
+            print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e) }); // TODO debug, remove
         }
         
         for (i in 20..39) {
@@ -95,6 +98,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
             c = circularShiftLeft(b, 30);
             b = a;
             a = carry;
+            print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e) }); // TODO debug, remove
         }
         
         for (i in 40..59) {
@@ -106,6 +110,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
             c = circularShiftLeft(b, 30);
             b = a;
             a = carry;
+            print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e) }); // TODO debug, remove
         }
         
         for (i in 60..79) {
@@ -117,6 +122,7 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
             c = circularShiftLeft(b, 30);
             b = a;
             a = carry;
+            print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e) }); // TODO debug, remove
         }
         
         h0 += a;
