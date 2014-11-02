@@ -75,61 +75,63 @@ shared class Sha1Compressor() satisfies FixedInputCompressor {
         variable Integer d = h3;
         variable Integer e = h4;
         
-        String fH(Integer x) => formatInteger(x, 16);
+        //String fH(Integer x) => formatInteger(x, 16);
+        
+        Integer mask = #FF_FF_FF_FF;
         
         for (i in 0..19) {
             Integer? w = words.get(i);
             assert (exists w);
-            Integer carry = circularShiftLeft(a, 5) + ((b.and(c)).or(b.not.and(d))) + e + w + k0;
+            Integer carry = ((((circularShiftLeft(a, 5) + ((b.and(c)).or(b.not.and(d)))).and(mask) + e).and(mask) + w).and(mask) + k0).and(mask);
             e = d;
             d = c;
             c = circularShiftLeft(b, 30);
             b = a;
             a = carry;
-            print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e) }); // TODO debug, remove
+            //print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e) });
         }
         
         for (i in 20..39) {
             Integer? w = words.get(i);
             assert (exists w);
-            Integer carry = circularShiftLeft(a, 5) + (b.xor(c).xor(d)) + e + w + k1;
+            Integer carry = ((((circularShiftLeft(a, 5) + (b.xor(c).xor(d))).and(mask) + e).and(mask) + w).and(mask) + k1).and(mask);
             e = d;
             d = c;
             c = circularShiftLeft(b, 30);
             b = a;
             a = carry;
-            print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e) }); // TODO debug, remove
+            //print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e) });
         }
         
         for (i in 40..59) {
             Integer? w = words.get(i);
             assert (exists w);
-            Integer carry = circularShiftLeft(a, 5) + ((b.and(c)).or(b.and(d)).or(c.and(d))) + e + w + k2;
+            Integer carry = ((((circularShiftLeft(a, 5) + ((b.and(c)).or(b.and(d)).or(c.and(d)))).and(mask) + e).and(mask) + w).and(mask) + k2).and(mask);
             e = d;
             d = c;
             c = circularShiftLeft(b, 30);
             b = a;
             a = carry;
-            print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e) }); // TODO debug, remove
+            //print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e) });
         }
         
         for (i in 60..79) {
             Integer? w = words.get(i);
             assert (exists w);
-            Integer carry = circularShiftLeft(a, 5) + (b.xor(c).xor(d)) + e + w + k3;
+            Integer carry = ((((circularShiftLeft(a, 5) + (b.xor(c).xor(d))).and(mask) + e).and(mask) + w).and(mask) + k3).and(mask);
             e = d;
             d = c;
             c = circularShiftLeft(b, 30);
             b = a;
             a = carry;
-            print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e) }); // TODO debug, remove
+            //print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e) });
         }
         
-        h0 += a;
-        h1 += b;
-        h2 += c;
-        h3 += d;
-        h4 += e;
+        h0 = (h0 + a).and(mask);
+        h1 = (h1 + b).and(mask);
+        h2 = (h2 + c).and(mask);
+        h3 = (h3 + d).and(mask);
+        h4 = (h4 + e).and(mask);
     }
     
     Array<Byte>(Integer) wordToBytes = wordToBytesFor(wordBitSize / 8);
