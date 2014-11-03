@@ -39,7 +39,7 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
     Array<Byte> strengthen(Array<Byte> final) {
         assert (final.size <= blockSize);
         "The size of [[final]] in bits with the terminating '1' bit."
-        Integer termBitSize = final.size + 1;
+        Integer termBitSize = final.size * 8 + 1;
         
         "The size of the length suffix seems to hold as the byte block size
          cast to bits. A 64 byte block size would have a 64 bit suffix. Note
@@ -62,8 +62,9 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
         // Copy in final to beginning
         final.copyTo(paddedFinal);
         
-        "The position of the the terminating '1' bit within the terminator byte."
-        Integer termPosition = termBitSize.remainder(8);
+        "The position of the the terminating '1' bit within the terminator byte.
+         [[termBitSize]] should never divide evenly with 8."
+        Integer termPosition = 8 - termBitSize.remainder(8);
         "The index of the terminator byte."
         Integer termByteIndex = termBitSize.divided(8);
         "Byte is immutable, so we have to get the existing Byte to modify it
@@ -81,11 +82,11 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
          side. Really this should use [[lengthSuffixBitSize]], but the Integer
          class might not be of that size. This alternate offset is safe since
          the array starts as all zeros."
-        Integer lengthSuffixStartByte = paddedByteSize - intAddrByteSize;
+        Integer lengthSuffixStartByte = paddedByteSize - 1;
         // Serialise the Integer a Byte at a time
         for (i in 0:intAddrByteSize) {
             Byte byte = messageBitSize.rightLogicalShift((intAddrByteSize - i) * 8).and($1111_1111).byte;
-            paddedFinal.set(lengthSuffixStartByte + i, byte);
+            paddedFinal.set(lengthSuffixStartByte - i, byte);
         }
         
         return paddedFinal;
