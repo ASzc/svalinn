@@ -18,7 +18,24 @@ class Sha1Test() {
     test
     shared void oneChar() {
         value expected = Array<Byte> { for (b in { #86, #f7, #e4, #37, #fa, #a5, #a7, #fc, #e1, #5d, #1d, #dc, #b9, #ea, #ea, #ea, #37, #76, #67, #b8 }) b.byte };
-        assertEquals(h.last(Array<Byte> {#61.byte}), expected);
+        assertEquals(h.last(Array<Byte> { #61.byte }), expected);
+    }
+    
+    "Example #1 from [NIST]
+     (http://csrc.nist.gov/groups/ST/toolkit/documents/Examples/SHA1.pdf)"
+    test
+    shared void nistOneBlock() {
+        value expected = Array<Byte> { for (b in { #a9, #99, #3e, #36, #47, #06, #81, #6a, #ba, #3e, #25, #71, #78, #50, #c2, #6c, #9c, #d0, #d8, #9d }) b.byte };
+        assertEquals(h.last(Array<Byte> { #61.byte, #62.byte, #63.byte }), expected);
+    }
+    
+    "Example #2 from [NIST]
+     (http://csrc.nist.gov/groups/ST/toolkit/documents/Examples/SHA1.pdf)"
+    test
+    shared void nistTwoBlock() {
+        value expected = Array<Byte> { for (b in { #84, #98, #3e, #44, #1c, #3b, #d2, #6e, #ba, #ae, #4a, #a1, #f9, #51, #29, #e5, #e5, #46, #70, #f1 }) b.byte };
+        value input = Array<Byte> { for (b in { #64, #63, #62, #61, #65, #64, #63, #62, #66, #65, #64, #63, #67, #66, #65, #64, #68, #67, #66, #65, #69, #68, #67, #66, #6a, #69, #68, #67, #6b, #6a, #69, #68, #6c, #6b, #6a, #69, #6d, #6c, #6b, #6a, #6e, #6d, #6c, #6b, #6f, #6e, #6d, #6c, #70, #6f, #6e, #6d, #71, #70, #6f, #6e }) b.byte };
+        assertEquals(h.last(input), expected);
     }
     
     //test
