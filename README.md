@@ -1,12 +1,12 @@
 # Svalinn - A cryptography library for Ceylon
 
-Svalinn is written in pure Ceylon, so it will not restrict you to a particular target of the Ceylon compiler.
+Svalinn is written in pure Ceylon, so it will not restrict you to a particular target of the Ceylon compiler. It's also compile-time type safe, so you don't have to use `String` algorithm names and catch `NoSuchAlgorithmException`s, as you would in Java.
 
-Unlike the standard library of Java, Svalinn uses the language's type system for algorithm implementation. This means that Svalinn is far easier to understand and extend. It's also type safe, so you don't have to use `String` algorithm names and catch `NoSuchAlgorithmException`s!
+Although the specifications implemented so far don't leave much room for error (i.e. they tend to either work or not work), Svalinn is a new library, so please use it with caution.
 
 ## Usage
 
-Svalinn works on `Array<Byte>` objects. To get `String`s into and out of this form, `ceylon.io.charset` has to be applied. Unfortunately, this packagage is part of a JVM-only module in the current release of Ceylon, but it would be feasible to implement a pure Ceylon version. The usual encoding for output hashes is hexadecimal, which isn't provided by the SDK ??? TODO hex conversion lib?
+Svalinn works on `Array<Byte>` objects. To get `String`s into and out of this form, `ceylon.io.charset` has to be applied. Unfortunately, this packagage is part of a JVM-only module in the current release of Ceylon. The planned `ceylon.text` may provide the required functionality in the future. The usual encoding for output hashes is hexadecimal, which isn't provided for arbitrary lengths at present (?).
 
 ## Algorithms
 
@@ -19,16 +19,17 @@ Svalinn currently contains implementations for the following cryptographic hash 
 
 ## Performance
 
+Probably not that great, but enough for short-ish messages.
+
 TODO performance comparison with Java standard library
 
 ## Acknowledgements
 
-The compression function interface is a combination of the Java and Python standard library packages for hashing.
+Thanks to the people in #ceylonlang for helping me find solutions to 
 
-A better understanding of the following points was obtained from the *Handbook of Applied Cryptography* by A. Menezes, P. van Oorschot and S. Vanstone. Thanks to the authors and the publisher for making it available without cost.
+The compression function interface is a combination of the hashing components of the Java and Python standard libraries.
 
-- Cryptographic hash function classification
-- Merkle–Damgård construction
+Details about the Merkle–Damgård construction, and the classification of cryptographic hash functions were found in the *Handbook of Applied Cryptography* by A. Menezes, P. van Oorschot and S. Vanstone. Thanks to the authors and the publisher for making it available without cost.
 
 ## License
 
