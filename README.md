@@ -1,35 +1,33 @@
 # Svalinn - A cryptography library for Ceylon
 
-Svalinn is written in pure Ceylon, so it will not restrict you to a particular target of the Ceylon compiler. It's also compile-time type safe, so you don't have to use `String` algorithm names and catch `NoSuchAlgorithmException`s, as you would in Java.
+Svalinn is written in pure [Ceylon](http://ceylon-lang.org/), so it will not restrict you to a particular target of the Ceylon compiler. It's also compile-time type safe, so you don't have to use `String` algorithm names and catch `NoSuchAlgorithmException`s, as you would in Java.
 
-Although the specifications implemented so far don't leave much room for error (i.e. they tend to either work or not work), Svalinn is a new library, so please use it with caution.
+Although the [specifications implemented](#algorithms) so far don't leave much room for error (i.e. they tend to either work or not work), Svalinn is a new library, so please use it with caution.
 
 ## Usage
 
-Svalinn works on `Array<Byte>` objects. To get `String`s into and out of this form, `ceylon.io.charset` has to be applied. Unfortunately, this packagage is part of a JVM-only module in the current release of Ceylon. The planned `ceylon.text` may provide the required functionality in the future. The usual encoding for output hashes is hexadecimal, which isn't provided for arbitrary lengths at present (?).
+Svalinn works on `Array<Byte>` objects. To get `String`s into and out of this form, `ceylon.io.charset` has to be applied. Unfortunately, this package is part of a JVM-only module in the current release of Ceylon. The planned `ceylon.text` may provide the required functionality in the future. The usual encoding for output hashes is hexadecimal, which isn't provided for arbitrary lengths at present (?).
 
 ## Algorithms
 
 Svalinn currently contains implementations for the following cryptographic hash algorithms:
 
 - SHA-1
-
-- HMAC (General purpose)
- - SHA-1 HMAC
+- SHA-1 HMAC
 
 ## Performance
 
-Probably not that great, but enough for short-ish messages.
+Probably not that great, but good enough for short-ish messages. Applications requiring a great amount of throughput are better suited to a native library.
 
 TODO performance comparison with Java standard library
 
 ## Acknowledgements
 
-Thanks to the people in #ceylonlang for helping me find solutions to 
+Thanks to the people in [#ceylonlang](http://ceylon-lang.org/community/) for helping me solve the problems I found during implementation.
 
-The compression function interface is a combination of the hashing components of the Java and Python standard libraries.
+The compression function interface is a combination of the hashing components of the [Java](http://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html) and [Python](https://docs.python.org/3/library/hashlib.html) standard libraries.
 
-Details about the Merkle–Damgård construction, and the classification of cryptographic hash functions were found in the *Handbook of Applied Cryptography* by A. Menezes, P. van Oorschot and S. Vanstone. Thanks to the authors and the publisher for making it available without cost.
+Details about the Merkle–Damgård construction, and the classification of cryptographic hash functions were found in the [Handbook of Applied Cryptography](http://cacr.uwaterloo.ca/hac/) by A. Menezes, P. van Oorschot and S. Vanstone. Thanks to the authors and the publisher for making it available without cost.
 
 ## License
 
