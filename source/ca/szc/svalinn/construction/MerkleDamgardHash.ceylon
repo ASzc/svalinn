@@ -82,11 +82,11 @@ shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariable
          side. Really this should use [[lengthSuffixBitSize]], but the Integer
          class might not be of that size. This alternate offset is safe since
          the array starts as all zeros."
-        Integer lengthSuffixStartByte = paddedByteSize - 1;
+        Integer lengthSuffixStartByte = paddedByteSize - intAddrByteSize;
         // Serialise the Integer a Byte at a time
         for (i in 0:intAddrByteSize) {
-            Byte byte = messageBitSize.rightLogicalShift((intAddrByteSize - i) * 8).and($1111_1111).byte;
-            paddedFinal.set(lengthSuffixStartByte - i, byte);
+            Byte byte = messageBitSize.rightLogicalShift((intAddrByteSize - 1 - i) * 8).byte;
+            paddedFinal.set(lengthSuffixStartByte + i, byte);
         }
         
         return paddedFinal;
