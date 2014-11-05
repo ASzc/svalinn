@@ -1,7 +1,8 @@
 import ca.szc.svalinn.compressor {
     wordToBytesFor,
     circularShiftLeftFor,
-    bitwiseEquals
+    bitwiseEquals,
+    circularShiftRightFor
 }
 import ceylon.test {
     test,
@@ -42,5 +43,30 @@ class CircularShiftLeftTest() {
         assertEquals(csl($0000_0000_0000_0000_0000_0000_1111_1111, 1), $0000_0000_0000_0000_0000_0001_1111_1110, "Ends 2", be);
         assertEquals(csl($1111_1111_0000_0000_0000_0000_0000_0000, 1), $1111_1110_0000_0000_0000_0000_0000_0001, "Ends 3", be);
         assertEquals(csl($1100_0000_0000_0000_0000_0000_0000_0001, 1), $1000_0000_0000_0000_0000_0000_0000_0011, "Ends 4", be);
+    }
+}
+
+class CircularShiftRightTest() {
+    test
+    shared void fourByteShift1() {
+        Boolean be(Anything a, Anything b) {
+            if (is Integer a, is Integer b) {
+                return bitwiseEquals(a, b);
+            } else {
+                return false;
+            }
+        }
+        
+        Integer(Integer, Integer) csl = circularShiftRightFor(32);
+        assertEquals(csl($0, 1), $0, "0", be);
+        assertEquals(csl($1, 1), #80_00_00_00, "1", be);
+        assertEquals(csl($10, 1), $1, "2", be);
+        assertEquals(csl($11, 1), #80_00_00_01, "3", be);
+        assertEquals(csl($0000_0000_0000_0000_1001_1000_0000_0000, 1), $0000_0000_0000_0000_0100_1100_0000_0000, "Middle 1", be);
+        assertEquals(csl($0010_0000_1111_0000_0000_0000_0000_0010, 1), $0001_0000_0111_1000_0000_0000_0000_0001, "Middle 2", be);
+        assertEquals(csl($1000_0000_0000_0000_0000_0000_0000_0000, 1), $0100_0000_0000_0000_0000_0000_0000_0000, "Ends 1", be);
+        assertEquals(csl($0000_0000_0000_0000_0000_0000_1111_1111, 1), $1000_0000_0000_0000_0000_0000_0111_1111, "Ends 2", be);
+        assertEquals(csl($1111_1111_0000_0000_0000_0000_0000_0000, 1), $0111_1111_1000_0000_0000_0000_0000_0000, "Ends 3", be);
+        assertEquals(csl($1100_0000_0000_0000_0000_0000_0000_0001, 1), $1110_0000_0000_0000_0000_0000_0000_0000, "Ends 4", be);
     }
 }
