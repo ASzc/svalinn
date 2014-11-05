@@ -2,7 +2,7 @@ import ca.szc.svalinn {
     FixedInputCompressor
 }
 
-class Sha256Compressor() satisfies FixedInputCompressor {
+shared class Sha256Compressor() satisfies FixedInputCompressor {
     Integer wordBitSize = 32;
     
     Array<Integer> constants = Array<Integer> {
