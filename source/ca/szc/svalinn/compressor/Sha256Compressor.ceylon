@@ -25,27 +25,27 @@ shared class Sha256Compressor() satisfies FixedInputCompressor {
     };
     
     // Intermediate hash values
-    variable Integer h0 = #c1_05_9e_d8;
-    variable Integer h1 = #36_7c_d5_07;
-    variable Integer h2 = #30_70_dd_17;
-    variable Integer h3 = #f7_0e_59_39;
-    variable Integer h4 = #ff_c0_0b_31;
-    variable Integer h5 = #68_58_15_11;
-    variable Integer h6 = #64_f9_8f_a7;
-    variable Integer h7 = #be_fa_4f_a4;
+    variable Integer h0 = #6a09e667;
+    variable Integer h1 = #bb67ae85;
+    variable Integer h2 = #3c6ef372;
+    variable Integer h3 = #a54ff53a;
+    variable Integer h4 = #510e527f;
+    variable Integer h5 = #9b05688c;
+    variable Integer h6 = #1f83d9ab;
+    variable Integer h7 = #5be0cd19;
     
     shared actual Integer blockSize => 64;
     shared actual Integer outputSize => 8 * 4;
     
     shared actual void reset() {
-        h0 = #c1_05_9e_d8;
-        h1 = #36_7c_d5_07;
-        h2 = #30_70_dd_17;
-        h3 = #f7_0e_59_39;
-        h4 = #ff_c0_0b_31;
-        h5 = #68_58_15_11;
-        h6 = #64_f9_8f_a7;
-        h7 = #be_fa_4f_a4;
+        h0 = #6a09e667;
+        h1 = #bb67ae85;
+        h2 = #3c6ef372;
+        h3 = #a54ff53a;
+        h4 = #510e527f;
+        h5 = #9b05688c;
+        h6 = #1f83d9ab;
+        h7 = #5be0cd19;
     }
     
     Integer(Integer, Integer) circularShiftRight = circularShiftRightFor(wordBitSize);
@@ -96,6 +96,8 @@ shared class Sha256Compressor() satisfies FixedInputCompressor {
         variable Integer g = h6;
         variable Integer h = h7;
         
+        String fH(Integer x) => formatInteger(x, 16);
+        
         for (i in 0..63) {
             Integer? w = words.get(i);
             Integer? k = constants.get(i);
@@ -117,6 +119,8 @@ shared class Sha256Compressor() satisfies FixedInputCompressor {
             c = b;
             b = a;
             a = (carry1 + carry2).and(mask);
+            
+            print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e), fH(f), fH(g), fH(h) });
         }
         
         h0 = (h0 + a).and(mask);
