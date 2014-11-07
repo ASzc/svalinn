@@ -14,7 +14,11 @@ shared Integer circularShiftLeftFor(Integer wordBitSize)(Integer bits, Integer s
         }
         mask = mask.or($1);
     }
-    return bits.leftLogicalShift(shiftAmount).or(bits.rightLogicalShift(wordBitSize - shiftAmount)).and(mask);
+    
+    Integer b = bits.and(mask);
+    Integer s = shiftAmount.remainder(wordBitSize);
+    
+    return b.leftLogicalShift(s).or(b.rightLogicalShift(wordBitSize - s)).and(mask);
 }
 
 shared Integer circularShiftRightFor(Integer wordBitSize)(Integer bits, Integer shiftAmount) {
@@ -25,7 +29,11 @@ shared Integer circularShiftRightFor(Integer wordBitSize)(Integer bits, Integer 
         }
         mask = mask.or($1);
     }
-    return bits.rightLogicalShift(shiftAmount).or(bits.leftLogicalShift(wordBitSize - shiftAmount)).and(mask);
+    
+    Integer b = bits.and(mask);
+    Integer s = shiftAmount.remainder(wordBitSize);
+    
+    return b.rightLogicalShift(s).or(b.leftLogicalShift(wordBitSize - s)).and(mask);
 }
 
 shared Boolean bitwiseEquals(Integer a, Integer b) {
