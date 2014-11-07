@@ -96,7 +96,7 @@ shared class Sha256Compressor() satisfies FixedInputCompressor {
         variable Integer g = h6;
         variable Integer h = h7;
         
-        String fH(Integer x) => formatInteger(x, 16);
+        String fH(Integer x) => formatInteger(x, 16).padLeading(8, '0');
         
         for (i in 0..63) {
             Integer? w = words.get(i);
@@ -120,7 +120,7 @@ shared class Sha256Compressor() satisfies FixedInputCompressor {
             b = a;
             a = (carry1 + carry2).and(mask);
             
-            print("\t".join { i, fH(a), fH(b), fH(c), fH(d), fH(e), fH(f), fH(g), fH(h) });
+            print(" ".join { i, fH(a), fH(b), fH(c), fH(d), fH(e), fH(f), fH(g), fH(h) });
         }
         
         h0 = (h0 + a).and(mask);
