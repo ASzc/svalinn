@@ -62,13 +62,6 @@ class CircularShiftRightTest() {
         assertEquals(csl($1100_0000_0000_0000_0000_0000_0000_0001, 1), $1110_0000_0000_0000_0000_0000_0000_0000, "Ends 4", be);
     }
     
-    //      a         b        c       d        e         f       g         h
-    //16 21da9a9b b0fa238e c0645fde d932eb16 8034229c 07590dcd 0b92f20c 745a48de
-    //16 21DA9A9B B0FA238E C0645FDE D932EB16 8034229C 07590DCD 0B92F20C 745A48DE
-    //     ..                                   ..
-    //17 c2ecd9d1 21da9a9b b0fa238e c0645fde 845fe454 8034229c 07590dcd 0b92f20c
-    //17 C2FBD9D1 21DA9A9B B0FA238E C0645FDE 846EE454 8034229C 07590DCD 0B92F20C
-    
     test
     shared void sha256_17_b1() {
         Integer(Integer, Integer) csr = circularShiftRightFor(32);
