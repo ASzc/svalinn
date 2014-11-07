@@ -75,12 +75,12 @@ shared class Sha256Compressor() satisfies FixedInputCompressor {
         
         // Expand inital 16 Integers into 64
         for (i in 16..63) {
-            Integer? m2 = words[i - 3];
-            Integer? m7 = words[i - 8];
-            Integer? m15 = words[i - 14];
+            Integer? m2 = words[i - 2];
+            Integer? m7 = words[i - 7];
+            Integer? m15 = words[i - 15];
             Integer? m16 = words[i - 16];
             assert (exists m2, exists m7, exists m15, exists m16);
-            
+
             Integer s1 = circularShiftRight(m2, 17).xor(circularShiftRight(m2, 19).xor(m2.rightLogicalShift(10)));
             Integer s0 = circularShiftRight(m15, 7).xor(circularShiftRight(m15, 18).xor(m15.rightLogicalShift(3)));
             
@@ -96,7 +96,7 @@ shared class Sha256Compressor() satisfies FixedInputCompressor {
         variable Integer g = h6;
         variable Integer h = h7;
         
-        String fH(Integer x) => formatInteger(x, 16).padLeading(8, '0');
+        //String fH(Integer x) => formatInteger(x, 16).padLeading(8, '0');
         
         for (i in 0..63) {
             Integer? w = words.get(i);
@@ -120,7 +120,7 @@ shared class Sha256Compressor() satisfies FixedInputCompressor {
             b = a;
             a = (carry1 + carry2).and(mask);
             
-            print(" ".join { i, fH(a), fH(b), fH(c), fH(d), fH(e), fH(f), fH(g), fH(h) });
+            //print(" ".join { i, fH(a), fH(b), fH(c), fH(d), fH(e), fH(f), fH(g), fH(h) });
         }
         
         h0 = (h0 + a).and(mask);
