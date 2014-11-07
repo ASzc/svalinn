@@ -98,6 +98,17 @@ shared class Sha256Compressor() satisfies FixedInputCompressor {
         
         String fH(Integer x) => formatInteger(x, 16).padLeading(8, '0');
         
+        Integer ba(Integer a, Integer b) {
+            variable Integer carry = a.and(b);
+            variable Integer result = a.xor(b);
+            while (carry != 0) {
+                Integer shiftedcarry = carry.leftLogicalShift(1);
+                carry = result.and(shiftedcarry);
+                result = result.xor(shiftedcarry);
+            }
+            return result;
+        }
+        
         for (i in 0..63) {
             Integer? w = words.get(i);
             Integer? k = constants.get(i);
@@ -105,20 +116,20 @@ shared class Sha256Compressor() satisfies FixedInputCompressor {
             
             Integer b1 = circularShiftRight(e, 6).xor(circularShiftRight(e, 11).xor(circularShiftRight(e, 25)));
             Integer ch = (e.and(f)).xor(e.not.and(g));
-            Integer carry1 = ((((h + b1).and(mask) + ch).and(mask) + k).and(mask) + w).and(mask);
+            Integer carry1 = ba(ba(ba(ba(h, b1).and(mask), ch).and(mask), k).and(mask), w).and(mask);
             
             Integer b0 = circularShiftRight(a, 2).xor(circularShiftRight(a, 13).xor(circularShiftRight(a, 22)));
             Integer maj = (a.and(b)).xor(a.and(c)).xor(b.and(c));
-            Integer carry2 = (b0 + maj).and(mask);
+            Integer carry2 = ba(b0, maj).and(mask);
             
             h = g;
             g = f;
             f = e;
-            e = (d + carry1).and(mask);
+            e = ba(d, carry1).and(mask);
             d = c;
             c = b;
             b = a;
-            a = (carry1 + carry2).and(mask);
+            a = ba(carry1, carry2).and(mask);
             
             print(" ".join { i, fH(a), fH(b), fH(c), fH(d), fH(e), fH(f), fH(g), fH(h) });
         }
