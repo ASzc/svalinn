@@ -6,7 +6,24 @@ Although the [specifications implemented](#algorithms) so far don't leave much r
 
 ## Usage
 
-Svalinn works on `Array<Byte>` objects. To get `String`s into and out of this form, `ceylon.io.charset` has to be applied. Unfortunately, this package is part of a JVM-only module in the current release of Ceylon. The planned `ceylon.text` may provide the required functionality in the future. The usual encoding for output hashes is hexadecimal, which isn't provided for arbitrary lengths at present (?).
+Users can find concrete classes for the algorithms in the root package, `ca.szc.svalinn`. An example using SHA-256:
+
+```ceylon
+import ca.szc.svalinn {
+    Sha256
+}
+
+shared void run() {
+    Sha256 hasher = Sha256();
+    Array<Byte> input = Array<Byte> { #61.byte, #62.byte, #63.byte };
+    Array<Byte> hash = hasher.last(input);
+    print("The SHA-256 hash of ``input`` is ``hash``.");
+}
+```
+
+Input can also be provided in chunks by calling `more()`. It's safe to reuse an object after calling `last()`, `done()`, or `reset()`.
+
+Svalinn uses `Array<Byte>` objects for input and output. To get `String`s to and from this form, `ceylon.io.charset` has to be applied. Unfortunately, this package is part of a JVM-only module in the current release of Ceylon. The planned `ceylon.text` may provide the required functionality in the future. The usual encoding for output hashes is hexadecimal, which isn't provided for arbitrary lengths at present (?).
 
 ## Algorithms
 
@@ -14,6 +31,8 @@ Svalinn currently contains implementations for the following cryptographic hash 
 
 - SHA-1
 - SHA-1 HMAC
+- SHA-256
+- SHA-256 HMAC
 
 ## Performance
 
