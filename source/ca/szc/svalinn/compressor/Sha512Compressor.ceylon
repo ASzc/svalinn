@@ -117,6 +117,7 @@ class Sha512Compressor() satisfies FixedInputCompressor {
     Integer(Integer, Integer) circularShiftRight = circularShiftRightFor(wordBitSize);
     
     shared actual void compress(Array<Byte> input) {
+        assert (input.size == blockSize);
     }
     
     Array<Byte>(Integer) wordToBytes = wordToBytesFor(wordBitSize / 8);
