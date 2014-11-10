@@ -118,6 +118,99 @@ class Sha512Compressor() satisfies FixedInputCompressor {
     
     shared actual void compress(Array<Byte> input) {
         assert (input.size == blockSize);
+        
+        if (wordBitSize == 32) {
+            Array<Integer> words = arrayOfSize(80 * 2, 0);
+            
+            // Convert 128 byte input block into 32 32-bit/4-byte Integers
+            for (i in 0..31) {
+                Byte? b1 = input.get(i * 4 + 0);
+                Byte? b2 = input.get(i * 4 + 1);
+                Byte? b3 = input.get(i * 4 + 2);
+                Byte? b4 = input.get(i * 4 + 3);
+                assert (exists b1, exists b2, exists b3, exists b4);
+                
+                Integer i1 = b1.unsigned.leftLogicalShift(24);
+                Integer i2 = b2.unsigned.leftLogicalShift(16);
+                Integer i3 = b3.unsigned.leftLogicalShift(8);
+                Integer i4 = b4.unsigned;
+                
+                words.set(i, i1.or(i2).or(i3).or(i4));
+            }
+            
+            Integer mask = #FF_FF_FF_FF;
+            
+            // Expand inital 32 Integers into 160
+            
+            // TODO
+            
+            variable Integer? aHI = intermediate.get(0);
+            variable Integer? aLI = intermediate.get(1);
+            variable Integer? bHI = intermediate.get(2);
+            variable Integer? bLI = intermediate.get(3);
+            variable Integer? cHI = intermediate.get(4);
+            variable Integer? cLI = intermediate.get(5);
+            variable Integer? dHI = intermediate.get(6);
+            variable Integer? dLI = intermediate.get(7);
+            variable Integer? eHI = intermediate.get(8);
+            variable Integer? eLI = intermediate.get(9);
+            variable Integer? fHI = intermediate.get(10);
+            variable Integer? fLI = intermediate.get(11);
+            variable Integer? gHI = intermediate.get(12);
+            variable Integer? gLI = intermediate.get(13);
+            variable Integer? hHI = intermediate.get(14);
+            variable Integer? hLI = intermediate.get(15);
+            
+            assert (exists aH = aHI, exists bH = bHI, exists cH = cHI, exists dH = dHI, exists eH = eHI, exists fH = fHI, exists gH = gHI, exists hH = hHI);
+            assert (exists aL = aLI, exists bL = bLI, exists cL = cLI, exists dL = dLI, exists eL = eLI, exists fL = fLI, exists gL = gLI, exists hL = hLI);
+            
+            // TODO
+        } else {
+            Array<Integer> words = arrayOfSize(80, 0);
+            
+            // Convert 128 byte input block into 16 64-bit/8-byte Integers
+            for (i in 0..15) {
+                Byte? b1 = input.get(i * 8 + 0);
+                Byte? b2 = input.get(i * 8 + 1);
+                Byte? b3 = input.get(i * 8 + 2);
+                Byte? b4 = input.get(i * 8 + 3);
+                Byte? b5 = input.get(i * 8 + 4);
+                Byte? b6 = input.get(i * 8 + 5);
+                Byte? b7 = input.get(i * 8 + 6);
+                Byte? b8 = input.get(i * 8 + 7);
+                assert (exists b1, exists b2, exists b3, exists b4, exists b5, exists b6, exists b7, exists b8);
+                
+                Integer i1 = b1.unsigned.leftLogicalShift(56);
+                Integer i2 = b2.unsigned.leftLogicalShift(48);
+                Integer i3 = b3.unsigned.leftLogicalShift(40);
+                Integer i4 = b4.unsigned.leftLogicalShift(32);
+                Integer i5 = b5.unsigned.leftLogicalShift(24);
+                Integer i6 = b6.unsigned.leftLogicalShift(16);
+                Integer i7 = b7.unsigned.leftLogicalShift(8);
+                Integer i8 = b8.unsigned;
+                
+                words.set(i, i1.or(i2).or(i3).or(i4).or(i5).or(i6).or(i7).or(i8));
+            }
+            
+            Integer mask = #FF_FF_FF_FF_FF_FF_FF_FF;
+            
+            // Expand inital 16 Integers into 80
+            
+            // TODO
+            
+            variable Integer? aI = intermediate.get(0);
+            variable Integer? bI = intermediate.get(1);
+            variable Integer? cI = intermediate.get(2);
+            variable Integer? dI = intermediate.get(3);
+            variable Integer? eI = intermediate.get(4);
+            variable Integer? fI = intermediate.get(5);
+            variable Integer? gI = intermediate.get(6);
+            variable Integer? hI = intermediate.get(7);
+            
+            assert (exists a = aI, exists b = bI, exists c = cI, exists d = dI, exists e = eI, exists f = fI, exists g = gI, exists h = hI);
+            
+            // TODO
+        }
     }
     
     Array<Byte>(Integer) wordToBytes = wordToBytesFor(wordBitSize / 8);
