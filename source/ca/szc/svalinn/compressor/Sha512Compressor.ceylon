@@ -141,6 +141,22 @@ class Sha512Compressor() satisfies FixedInputCompressor {
             Integer mask = #FF_FF_FF_FF;
             
             // Expand inital 32 Integers into 160
+            for (i in 32..159) {
+                // TODO
+                Integer? m2 = words[i - 2 * 2];
+                Integer? m7 = words[i - 7 * 2];
+                Integer? m15 = words[i - 15 * 2];
+                Integer? m16 = words[i - 16 * 2];
+                assert (exists m2, exists m7, exists m15, exists m16);
+                
+                // TODO special rotation op
+                Integer s1 = circularShiftRight(m2, 19).xor(circularShiftRight(m2, 61).xor(m2.rightLogicalShift(6)));
+                Integer s0 = circularShiftRight(m15, 1).xor(circularShiftRight(m15, 8).xor(m15.rightLogicalShift(7)));
+                //SSIG1(x) = ROTR^19(x) XOR ROTR^61(x) XOR SHR^6(x)
+                //SSIG0(x) = ROTR^1(x) XOR ROTR^8(x) XOR SHR^7(x)
+                
+                // Wt = SSIG1(W(t-2)) + W(t-7) + SSIG0(t-15) + W(t-16)
+            }
             
             // TODO
             
@@ -163,6 +179,14 @@ class Sha512Compressor() satisfies FixedInputCompressor {
             
             assert (exists aH = aHI, exists bH = bHI, exists cH = cHI, exists dH = dHI, exists eH = eHI, exists fH = fHI, exists gH = gHI, exists hH = hHI);
             assert (exists aL = aLI, exists bL = bLI, exists cL = cLI, exists dL = dLI, exists eL = eLI, exists fL = fLI, exists gL = gLI, exists hL = hLI);
+            
+            //CH( x, y, z) = (x AND y) XOR ( (NOT x) AND z)
+            //BSIG1(x) = ROTR^14(x) XOR ROTR^18(x) XOR ROTR^41(x)
+            //T1 = h + BSIG1(e) + CH(e,f,g) + Kt + Wt
+            
+            //MAJ( x, y, z) = (x AND y) XOR (x AND z) XOR (y AND z)
+            //BSIG0(x) = ROTR^28(x) XOR ROTR^34(x) XOR ROTR^39(x)
+            //T2 = BSIG0(a) + MAJ(a,b,c)
             
             // TODO
         } else {
