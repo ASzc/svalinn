@@ -6,7 +6,7 @@ import ca.szc.svalinn {
     Sha256
 }
 
-class Sha256Test() {
+shared class Sha256Test() {
     Sha256 h = Sha256();
     
     test

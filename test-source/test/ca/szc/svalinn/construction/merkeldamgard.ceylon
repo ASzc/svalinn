@@ -62,7 +62,7 @@ class NistTwoBlockFic() satisfies FixedInputCompressor {
 
 class NistTwoBlockMd() extends MerkleDamgardHash(`NistTwoBlockFic`) {}
 
-class MerkleDamgardHashTest() {
+shared class MerkleDamgardHashTest() {
     "Example #1 from [NIST]
      (http://csrc.nist.gov/groups/ST/toolkit/documents/Examples/SHA1.pdf)"
     test

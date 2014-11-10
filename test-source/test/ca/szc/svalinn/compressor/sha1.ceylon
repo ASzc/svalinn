@@ -7,7 +7,7 @@ import ceylon.test {
     assertEquals
 }
 
-class Sha1CompressorTest() {
+shared class Sha1CompressorTest() {
     test
     shared void undersizeCompress() {
         Sha1Compressor c = Sha1Compressor();

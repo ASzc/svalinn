@@ -6,7 +6,7 @@ import ceylon.test {
     assertEquals
 }
 
-class Sha1Test() {
+shared class Sha1Test() {
     Sha1 h = Sha1();
     
     test

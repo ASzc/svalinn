@@ -7,7 +7,7 @@ import ceylon.test {
     assertEquals
 }
 
-class Sha1HmacTest() {
+shared class Sha1HmacTest() {
     "Example #1 NIST [NIST]
      (http://csrc.nist.gov/groups/ST/toolkit/documents/Examples/HMAC_SHA1.pdf)"
     test
@@ -42,7 +42,7 @@ class Sha1HmacTest() {
     }
 }
 
-class Sha256HmacTest() {
+shared class Sha256HmacTest() {
     "Example #1 NIST [NIST]
      (http://csrc.nist.gov/groups/ST/toolkit/documents/Examples/HMAC_SHA256.pdf)"
     test
