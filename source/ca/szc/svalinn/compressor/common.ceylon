@@ -83,3 +83,33 @@ shared [Integer, Integer] shiftLeftTwoIntFor(Integer wordBitSize)(Integer bitsHi
     
     return [shiftedHigh, shiftedLow];
 }
+
+shared [Integer, Integer] circularShiftRightTwoIntFor(Integer wordBitSize)(Integer bitsHigh, Integer bitsLow, Integer shiftAmount) {
+    value shiftRightTwoInt = shiftRightTwoIntFor(wordBitSize);
+    value shiftLeftTwoInt = shiftLeftTwoIntFor(wordBitSize);
+    
+    variable Integer mask = 0;
+    for (Integer i in 0:wordBitSize) {
+        if (i > 0) {
+            mask = mask.leftLogicalShift(1);
+        }
+        mask = mask.or($1);
+    }
+    
+    Integer bH = bitsHigh.and(mask);
+    Integer bL = bitsLow.and(mask);
+    Integer s = shiftAmount.remainder(wordBitSize);
+    
+    value r = shiftRightTwoInt(bH, bL, s);
+    Integer rbH = r[0].and(mask);
+    Integer rbL = r[1].and(mask);
+    
+    value l = shiftLeftTwoInt(bH, bL, wordBitSize * 2 - s);
+    Integer lbH = l[0].and(mask);
+    Integer lbL = l[1].and(mask);
+    
+    Integer cH = rbH.or(lbH);
+    Integer cL = rbL.or(lbL);
+    
+    return [cH, cL];
+}
