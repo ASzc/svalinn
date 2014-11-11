@@ -36,6 +36,28 @@ shared Integer circularShiftRightFor(Integer wordBitSize)(Integer bits, Integer 
     return b.rightLogicalShift(s).or(b.leftLogicalShift(wordBitSize - s)).and(mask);
 }
 
+shared [Integer, Integer] shiftRightTwoIntFor(Integer wordBitSize)(Integer bitsHigh, Integer bitsLow, Integer shiftAmount) {
+    Integer shiftedHigh;
+    if (0 <= shiftAmount < wordBitSize) {
+        shiftedHigh = bitsHigh.rightLogicalShift(shiftAmount);
+    } else {
+        shiftedHigh = 0;
+    }
+    
+    Integer shiftedLow;
+    if (shiftAmount > wordBitSize) {
+        shiftedLow = bitsHigh.rightLogicalShift(shiftAmount - wordBitSize);
+    } else if (shiftAmount == wordBitSize) {
+        shiftedLow = bitsHigh;
+    } else if (shiftAmount >= 0) {
+        shiftedLow = bitsHigh.leftLogicalShift(wordBitSize - shiftAmount).or(bitsLow.rightLogicalShift(shiftAmount));
+    } else {
+        shiftedLow = 0;
+    }
+    
+    return [shiftedHigh, shiftedLow];
+}
+
 shared Boolean bitwiseEquals(Integer a, Integer b) {
     return a.xor(b) == 0;
 }
