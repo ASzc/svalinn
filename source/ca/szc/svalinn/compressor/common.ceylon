@@ -113,3 +113,16 @@ shared [Integer, Integer] circularShiftRightTwoIntFor(Integer wordBitSize)(Integ
     
     return [cH, cL];
 }
+
+shared [Integer, Integer] addTwoIntFor(Integer wordBitSize)(Integer oneHigh, Integer oneLow, Integer twoHigh, Integer twoLow, Integer shiftAmount) {
+    Integer aL = oneLow + twoLow;
+    Integer carry;
+    if (aL < oneLow) {
+        carry = 1;
+    } else {
+        carry = 0;
+    }
+    Integer aH = oneHigh + twoHigh + carry;
+    
+    return [aH, aL];
+}
