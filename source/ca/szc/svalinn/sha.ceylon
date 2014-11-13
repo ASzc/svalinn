@@ -1,6 +1,7 @@
 import ca.szc.svalinn.compressor {
     Sha1Compressor,
-    Sha256Compressor
+    Sha256Compressor,
+    Sha512Compressor
 }
 import ca.szc.svalinn.construction {
     MerkleDamgardHash
@@ -12,3 +13,5 @@ import ca.szc.svalinn.construction {
 shared class Sha1() extends MerkleDamgardHash(`Sha1Compressor`) {}
 
 shared class Sha256() extends MerkleDamgardHash(`Sha256Compressor`) {}
+
+shared class Sha512() extends MerkleDamgardHash(`Sha512Compressor`) {}

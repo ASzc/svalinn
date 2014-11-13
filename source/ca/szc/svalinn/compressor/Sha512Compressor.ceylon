@@ -2,7 +2,7 @@ import ca.szc.svalinn {
     FixedInputCompressor
 }
 
-class Sha512Compressor() satisfies FixedInputCompressor {
+shared class Sha512Compressor() satisfies FixedInputCompressor {
     Integer wordBitSize;
     if (runtime.integerAddressableSize >= 64) {
         wordBitSize = 64;
