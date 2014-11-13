@@ -40,21 +40,21 @@ shared Boolean bitwiseEquals(Integer a, Integer b) {
     return a.xor(b) == 0;
 }
 
-shared [Integer, Integer] shiftRightTwoIntFor(Integer wordBitSize)(Integer bitsHigh, Integer bitsLow, Integer shiftAmount) {
+shared [Integer, Integer] shiftRightTwoIntFor(Integer wordBitSize)([Integer, Integer] bits, Integer shiftAmount) {
     Integer shiftedHigh;
     if (0 <= shiftAmount < wordBitSize) {
-        shiftedHigh = bitsHigh.rightLogicalShift(shiftAmount);
+        shiftedHigh = bits[0].rightLogicalShift(shiftAmount);
     } else {
         shiftedHigh = 0;
     }
     
     Integer shiftedLow;
     if (shiftAmount > wordBitSize) {
-        shiftedLow = bitsHigh.rightLogicalShift(shiftAmount - wordBitSize);
+        shiftedLow = bits[0].rightLogicalShift(shiftAmount - wordBitSize);
     } else if (shiftAmount == wordBitSize) {
-        shiftedLow = bitsHigh;
+        shiftedLow = bits[0];
     } else if (shiftAmount >= 0) {
-        shiftedLow = bitsHigh.leftLogicalShift(wordBitSize - shiftAmount).or(bitsLow.rightLogicalShift(shiftAmount));
+        shiftedLow = bits[0].leftLogicalShift(wordBitSize - shiftAmount).or(bits[1].rightLogicalShift(shiftAmount));
     } else {
         shiftedLow = 0;
     }
@@ -62,21 +62,21 @@ shared [Integer, Integer] shiftRightTwoIntFor(Integer wordBitSize)(Integer bitsH
     return [shiftedHigh, shiftedLow];
 }
 
-shared [Integer, Integer] shiftLeftTwoIntFor(Integer wordBitSize)(Integer bitsHigh, Integer bitsLow, Integer shiftAmount) {
+shared [Integer, Integer] shiftLeftTwoIntFor(Integer wordBitSize)([Integer, Integer] bits, Integer shiftAmount) {
     Integer shiftedHigh;
     if (shiftAmount > wordBitSize) {
-        shiftedHigh = bitsLow.leftLogicalShift(shiftAmount - wordBitSize);
+        shiftedHigh = bits[1].leftLogicalShift(shiftAmount - wordBitSize);
     } else if (shiftAmount == wordBitSize) {
-        shiftedHigh = bitsLow;
+        shiftedHigh = bits[1];
     } else if (shiftAmount >= 0) {
-        shiftedHigh = bitsHigh.leftLogicalShift(shiftAmount).or(bitsLow.rightLogicalShift(wordBitSize - shiftAmount));
+        shiftedHigh = bits[0].leftLogicalShift(shiftAmount).or(bits[1].rightLogicalShift(wordBitSize - shiftAmount));
     } else {
         shiftedHigh = 0;
     }
     
     Integer shiftedLow;
     if (0 <= shiftAmount < wordBitSize) {
-        shiftedLow = bitsLow.leftLogicalShift(shiftAmount);
+        shiftedLow = bits[1].leftLogicalShift(shiftAmount);
     } else {
         shiftedLow = 0;
     }
@@ -84,7 +84,7 @@ shared [Integer, Integer] shiftLeftTwoIntFor(Integer wordBitSize)(Integer bitsHi
     return [shiftedHigh, shiftedLow];
 }
 
-shared [Integer, Integer] circularShiftRightTwoIntFor(Integer wordBitSize)(Integer bitsHigh, Integer bitsLow, Integer shiftAmount) {
+shared [Integer, Integer] circularShiftRightTwoIntFor(Integer wordBitSize)([Integer, Integer] bits, Integer shiftAmount) {
     value shiftRightTwoInt = shiftRightTwoIntFor(wordBitSize);
     value shiftLeftTwoInt = shiftLeftTwoIntFor(wordBitSize);
     
@@ -96,15 +96,14 @@ shared [Integer, Integer] circularShiftRightTwoIntFor(Integer wordBitSize)(Integ
         mask = mask.or($1);
     }
     
-    Integer bH = bitsHigh.and(mask);
-    Integer bL = bitsLow.and(mask);
+    value bitsMasked = [bits[0].and(mask), bits[1].and(mask)];
     Integer s = shiftAmount.remainder(wordBitSize);
     
-    value r = shiftRightTwoInt(bH, bL, s);
+    value r = shiftRightTwoInt(bitsMasked, s);
     Integer rbH = r[0].and(mask);
     Integer rbL = r[1].and(mask);
     
-    value l = shiftLeftTwoInt(bH, bL, wordBitSize * 2 - s);
+    value l = shiftLeftTwoInt(bitsMasked, wordBitSize * 2 - s);
     Integer lbH = l[0].and(mask);
     Integer lbL = l[1].and(mask);
     
@@ -114,15 +113,24 @@ shared [Integer, Integer] circularShiftRightTwoIntFor(Integer wordBitSize)(Integ
     return [cH, cL];
 }
 
-shared [Integer, Integer] addTwoIntFor(Integer wordBitSize)(Integer oneHigh, Integer oneLow, Integer twoHigh, Integer twoLow, Integer shiftAmount) {
-    Integer aL = oneLow + twoLow;
+shared [Integer, Integer] addTwoIntFor(Integer wordBitSize)([Integer, Integer] one, [Integer, Integer] two) {
+    Integer aL = one[1] + two[1];
     Integer carry;
-    if (aL < oneLow) {
+    if (aL < one[1]) {
         carry = 1;
     } else {
         carry = 0;
     }
-    Integer aH = oneHigh + twoHigh + carry;
+    Integer aH = one[0] + two[0] + carry;
     
     return [aH, aL];
+}
+
+shared [Integer, Integer] xorTwoInt([Integer, Integer] one, [Integer, Integer] two) {
+    return [one[0].xor(two[0]), one[1].xor(two[1])];
+}
+
+shared [Integer, Integer] makeTwoInt(Integer? one, Integer? two) {
+    assert (exists one, exists two);
+    return [one, two];
 }

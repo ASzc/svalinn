@@ -115,6 +115,9 @@ class Sha512Compressor() satisfies FixedInputCompressor {
     }
     
     Integer(Integer, Integer) circularShiftRight = circularShiftRightFor(wordBitSize);
+    value shiftRightTwoInt = shiftRightTwoIntFor(32);
+    value circularShiftRightTwoInt = circularShiftRightTwoIntFor(32);
+    value addTwoInt = addTwoIntFor(32);
     
     shared actual void compress(Array<Byte> input) {
         assert (input.size == blockSize);
@@ -138,24 +141,21 @@ class Sha512Compressor() satisfies FixedInputCompressor {
                 words.set(i, i1.or(i2).or(i3).or(i4));
             }
             
-            Integer mask = #FF_FF_FF_FF;
-            
             // Expand inital 32 Integers into 160
             for (i in 32..159) {
-                // TODO
-                Integer? m2 = words[i - 2 * 2];
-                Integer? m7 = words[i - 7 * 2];
-                Integer? m15 = words[i - 15 * 2];
-                Integer? m16 = words[i - 16 * 2];
-                assert (exists m2, exists m7, exists m15, exists m16);
+                // TODO indices?
+                value m2 = makeTwoInt(words[i - 2 * 2], words[i - 2 * 2 + 1]);
+                value m7 = makeTwoInt(words[i - 7 * 2], words[i - 7 * 2 + 1]);
+                value m15 = makeTwoInt(words[i - 15 * 2], words[i - 15 * 2 + 1]);
+                value m16 = makeTwoInt(words[i - 16 * 2], words[i - 16 * 2 + 1]);
                 
-                // TODO special rotation op
-                Integer s1 = circularShiftRight(m2, 19).xor(circularShiftRight(m2, 61).xor(m2.rightLogicalShift(6)));
-                Integer s0 = circularShiftRight(m15, 1).xor(circularShiftRight(m15, 8).xor(m15.rightLogicalShift(7)));
-                //SSIG1(x) = ROTR^19(x) XOR ROTR^61(x) XOR SHR^6(x)
-                //SSIG0(x) = ROTR^1(x) XOR ROTR^8(x) XOR SHR^7(x)
+                value s1 = xorTwoInt(xorTwoInt(circularShiftRightTwoInt(m2, 19), circularShiftRightTwoInt(m2, 61)), shiftRightTwoInt(m2, 6));
+                value s0 = xorTwoInt(xorTwoInt(circularShiftRightTwoInt(m15, 1), circularShiftRightTwoInt(m15, 8)), shiftRightTwoInt(m15, 7));
                 
-                // Wt = SSIG1(W(t-2)) + W(t-7) + SSIG0(t-15) + W(t-16)
+                value w = addTwoInt(addTwoInt(addTwoInt(s1, m7), s0), m16);
+                // TODO indices?
+                words.set(i, w[0]);
+                words.set(i+1, w[1]);
             }
             
             // TODO
