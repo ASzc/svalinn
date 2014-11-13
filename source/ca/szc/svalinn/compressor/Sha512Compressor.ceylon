@@ -142,53 +142,90 @@ class Sha512Compressor() satisfies FixedInputCompressor {
             }
             
             // Expand inital 32 Integers into 160
-            for (i in 32..159) {
-                // TODO indices?
-                value m2 = makeTwoInt(words[i - 2 * 2], words[i - 2 * 2 + 1]);
-                value m7 = makeTwoInt(words[i - 7 * 2], words[i - 7 * 2 + 1]);
-                value m15 = makeTwoInt(words[i - 15 * 2], words[i - 15 * 2 + 1]);
-                value m16 = makeTwoInt(words[i - 16 * 2], words[i - 16 * 2 + 1]);
+            for (i in (32..159).by(2)) {
+                value m2 = makeTwoInt(words[i - 2], words[i - 2 + 1]);
+                value m7 = makeTwoInt(words[i - 7], words[i - 7 + 1]);
+                value m15 = makeTwoInt(words[i - 15], words[i - 15 + 1]);
+                value m16 = makeTwoInt(words[i - 16], words[i - 16 + 1]);
                 
                 value s1 = xorTwoInt(xorTwoInt(circularShiftRightTwoInt(m2, 19), circularShiftRightTwoInt(m2, 61)), shiftRightTwoInt(m2, 6));
                 value s0 = xorTwoInt(xorTwoInt(circularShiftRightTwoInt(m15, 1), circularShiftRightTwoInt(m15, 8)), shiftRightTwoInt(m15, 7));
                 
                 value w = addTwoInt(addTwoInt(addTwoInt(s1, m7), s0), m16);
-                // TODO indices?
                 words.set(i, w[0]);
-                words.set(i+1, w[1]);
+                words.set(i + 1, w[1]);
             }
             
-            // TODO
+            variable value a = makeTwoInt(intermediate.get(0), intermediate.get(1));
+            variable value b = makeTwoInt(intermediate.get(2), intermediate.get(3));
+            variable value c = makeTwoInt(intermediate.get(4), intermediate.get(5));
+            variable value d = makeTwoInt(intermediate.get(6), intermediate.get(7));
+            variable value e = makeTwoInt(intermediate.get(8), intermediate.get(9));
+            variable value f = makeTwoInt(intermediate.get(10), intermediate.get(11));
+            variable value g = makeTwoInt(intermediate.get(12), intermediate.get(13));
+            variable value h = makeTwoInt(intermediate.get(14), intermediate.get(15));
             
-            variable Integer? aHI = intermediate.get(0);
-            variable Integer? aLI = intermediate.get(1);
-            variable Integer? bHI = intermediate.get(2);
-            variable Integer? bLI = intermediate.get(3);
-            variable Integer? cHI = intermediate.get(4);
-            variable Integer? cLI = intermediate.get(5);
-            variable Integer? dHI = intermediate.get(6);
-            variable Integer? dLI = intermediate.get(7);
-            variable Integer? eHI = intermediate.get(8);
-            variable Integer? eLI = intermediate.get(9);
-            variable Integer? fHI = intermediate.get(10);
-            variable Integer? fLI = intermediate.get(11);
-            variable Integer? gHI = intermediate.get(12);
-            variable Integer? gLI = intermediate.get(13);
-            variable Integer? hHI = intermediate.get(14);
-            variable Integer? hLI = intermediate.get(15);
+            for (i in (0..159).by(2)) {
+                value w = makeTwoInt(words.get(i), words.get(i + 1));
+                value k = makeTwoInt(constants.get(i), constants.get(i + 1));
+                
+                value b1 = xorTwoInt(xorTwoInt(circularShiftRightTwoInt(e, 14), circularShiftRightTwoInt(e, 18)), circularShiftRightTwoInt(e, 41));
+                value ch = xorTwoInt(andTwoInt(e, f), andTwoInt(notTwoInt(e), g));
+                value carry1 = addTwoInt(addTwoInt(addTwoInt(addTwoInt(h, b1), ch), k), w);
+                
+                value b0 = xorTwoInt(xorTwoInt(circularShiftRightTwoInt(a, 28), circularShiftRightTwoInt(a, 34)), circularShiftRightTwoInt(a, 39));
+                value maj = xorTwoInt(xorTwoInt(andTwoInt(a, b), andTwoInt(a, c)), andTwoInt(b, c));
+                value carry2 = addTwoInt(b0, maj);
+                
+                h = g;
+                g = f;
+                f = e;
+                e = addTwoInt(d, carry1);
+                d = c;
+                c = b;
+                b = a;
+                a = addTwoInt(carry1, carry2);
+            }
             
-            assert (exists aH = aHI, exists bH = bHI, exists cH = cHI, exists dH = dHI, exists eH = eHI, exists fH = fHI, exists gH = gHI, exists hH = hHI);
-            assert (exists aL = aLI, exists bL = bLI, exists cL = cLI, exists dL = dLI, exists eL = eLI, exists fL = fLI, exists gL = gLI, exists hL = hLI);
+            value h0 = makeTwoInt(intermediate.get(0), intermediate.get(1));
+            value h0P = addTwoInt(h0, a);
+            intermediate.set(0, h0P[0]);
+            intermediate.set(1, h0P[1]);
             
-            //CH( x, y, z) = (x AND y) XOR ( (NOT x) AND z)
-            //BSIG1(x) = ROTR^14(x) XOR ROTR^18(x) XOR ROTR^41(x)
-            //T1 = h + BSIG1(e) + CH(e,f,g) + Kt + Wt
+            value h1 = makeTwoInt(intermediate.get(2), intermediate.get(3));
+            value h1P = addTwoInt(h1, b);
+            intermediate.set(2, h1P[0]);
+            intermediate.set(3, h1P[1]);
             
-            //MAJ( x, y, z) = (x AND y) XOR (x AND z) XOR (y AND z)
-            //BSIG0(x) = ROTR^28(x) XOR ROTR^34(x) XOR ROTR^39(x)
-            //T2 = BSIG0(a) + MAJ(a,b,c)
+            value h2 = makeTwoInt(intermediate.get(4), intermediate.get(5));
+            value h2P = addTwoInt(h2, c);
+            intermediate.set(4, h2P[0]);
+            intermediate.set(5, h2P[1]);
             
-            // TODO
+            value h3 = makeTwoInt(intermediate.get(6), intermediate.get(7));
+            value h3P = addTwoInt(h3, d);
+            intermediate.set(4, h3P[0]);
+            intermediate.set(5, h3P[1]);
+            
+            value h4 = makeTwoInt(intermediate.get(8), intermediate.get(9));
+            value h4P = addTwoInt(h4, e);
+            intermediate.set(4, h4P[0]);
+            intermediate.set(5, h4P[1]);
+            
+            value h5 = makeTwoInt(intermediate.get(10), intermediate.get(11));
+            value h5P = addTwoInt(h5, f);
+            intermediate.set(4, h5P[0]);
+            intermediate.set(5, h5P[1]);
+            
+            value h6 = makeTwoInt(intermediate.get(12), intermediate.get(13));
+            value h6P = addTwoInt(h6, g);
+            intermediate.set(4, h6P[0]);
+            intermediate.set(5, h6P[1]);
+            
+            value h7 = makeTwoInt(intermediate.get(14), intermediate.get(15));
+            value h7P = addTwoInt(h7, h);
+            intermediate.set(4, h7P[0]);
+            intermediate.set(5, h7P[1]);
         } else {
             Array<Integer> words = arrayOfSize(80, 0);
             

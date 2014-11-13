@@ -130,6 +130,14 @@ shared [Integer, Integer] xorTwoInt([Integer, Integer] one, [Integer, Integer] t
     return [one[0].xor(two[0]), one[1].xor(two[1])];
 }
 
+shared [Integer, Integer] notTwoInt([Integer, Integer] one) {
+    return [one[0].not, one[1].not];
+}
+
+shared [Integer, Integer] andTwoInt([Integer, Integer] one, [Integer, Integer] two) {
+    return [one[0].and(two[0]), one[1].and(two[1])];
+}
+
 shared [Integer, Integer] makeTwoInt(Integer? one, Integer? two) {
     assert (exists one, exists two);
     return [one, two];
