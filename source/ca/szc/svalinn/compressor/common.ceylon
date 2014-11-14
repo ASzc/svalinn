@@ -97,30 +97,43 @@ shared [Integer, Integer] circularShiftRightTwoIntFor(Integer wordBitSize)([Inte
     }
     
     value bitsMasked = [bits[0].and(mask), bits[1].and(mask)];
-    Integer s = shiftAmount.remainder(wordBitSize);
     
-    value r = shiftRightTwoInt(bitsMasked, s);
+    value r = shiftRightTwoInt(bitsMasked, shiftAmount);
     Integer rbH = r[0].and(mask);
     Integer rbL = r[1].and(mask);
     
-    value l = shiftLeftTwoInt(bitsMasked, wordBitSize * 2 - s);
+    value l = shiftLeftTwoInt(bitsMasked, wordBitSize * 2 - shiftAmount);
     Integer lbH = l[0].and(mask);
     Integer lbL = l[1].and(mask);
     
     Integer cH = rbH.or(lbH);
     Integer cL = rbL.or(lbL);
     
-    return [cH, cL];
+    return [cH.and(mask), cL.and(mask)];
+}
+
+shared Integer bitwiseAdd(Integer a, Integer b) {
+    variable Integer carry = a.and(b);
+    variable Integer result = a.xor(b);
+    while (carry != 0) {
+        Integer shiftedcarry = carry.leftLogicalShift(1);
+        carry = result.and(shiftedcarry);
+        result = result.xor(shiftedcarry);
+    }
+    return result;
 }
 
 shared [Integer, Integer] addTwoIntFor(Integer wordBitSize)([Integer, Integer] one, [Integer, Integer] two) {
+    //Integer aL = bitwiseAdd(one[1], two[1]);
     Integer aL = one[1] + two[1];
+    // Did aL overflow?
     Integer carry;
     if (aL < one[1]) {
         carry = 1;
     } else {
         carry = 0;
     }
+    //Integer aH = bitwiseAdd(bitwiseAdd(one[0], two[0]), carry);
     Integer aH = one[0] + two[0] + carry;
     
     return [aH, aL];

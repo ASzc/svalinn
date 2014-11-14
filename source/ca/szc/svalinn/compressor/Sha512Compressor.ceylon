@@ -165,6 +165,9 @@ shared class Sha512Compressor() satisfies FixedInputCompressor {
             variable value g = makeTwoInt(intermediate.get(12), intermediate.get(13));
             variable value h = makeTwoInt(intermediate.get(14), intermediate.get(15));
             
+            String toHex(Integer input) => "".join { for (i in (7..0)) formatInteger(input.rightLogicalShift(i*4).and($1111), 16) };
+            String fH([Integer, Integer] x) => toHex(x[0]) + "_" + toHex(x[1]);
+            
             for (i in (0..159).by(2)) {
                 value w = makeTwoInt(words.get(i), words.get(i + 1));
                 value k = makeTwoInt(constants.get(i), constants.get(i + 1));
@@ -185,6 +188,8 @@ shared class Sha512Compressor() satisfies FixedInputCompressor {
                 c = b;
                 b = a;
                 a = addTwoInt(carry1, carry2);
+                
+                print(" ".join { i, fH(w), fH(a), fH(b), fH(c), fH(d), fH(e), fH(f), fH(g), fH(h) });
             }
             
             value h0 = makeTwoInt(intermediate.get(0), intermediate.get(1));

@@ -2,7 +2,8 @@ import ca.szc.svalinn.compressor {
     wordToBytesFor,
     circularShiftLeftFor,
     bitwiseEquals,
-    circularShiftRightFor
+    circularShiftRightFor,
+    circularShiftRightTwoIntFor
 }
 import ceylon.test {
     test,
@@ -25,7 +26,7 @@ Boolean be(Anything a, Anything b) {
     if (is Integer a, is Integer b) {
         return bitwiseEquals(a, b);
     } else {
-        return false;
+        throw Exception("be was called with a non-Integer");
     }
 }
 
@@ -90,5 +91,82 @@ class CircularShiftRightTest() {
         assertEquals(csr(a16ini, 2), a16cr6, "2", be);
         assertEquals(csr(a16ini, 13), a16c13, "13", be);
         assertEquals(csr(a16ini, 22), a16c25, "22", be);
+    }
+}
+
+Boolean btie(Anything a, Anything b) {
+    if (is [Integer, Integer] a, is [Integer, Integer] b) {
+        return bitwiseEquals(a[0], b[0]) && bitwiseEquals(a[1], b[1]);
+    } else {
+        throw Exception("btie was called with a non-tuple");
+    }
+}
+
+shared class CircularShiftRightTwoIntTest() {
+    test
+    shared void fourByteShift1() {
+        value csr = circularShiftRightTwoIntFor(32);
+        assertEquals(csr([$0, $0], 1), [$0, $0], "0", btie);
+        assertEquals(csr([$0, $1], 1), [#8000_0000, $0], "1", btie);
+        assertEquals(csr([$0, $10], 1), [$0, $1], "2", btie);
+        assertEquals(csr([$0, $11], 1), [#8000_0000, $1], "3", btie);
+        
+        assertEquals(csr([#8000_0000, $101], 1), [#C000_0000, $10], "Ends 1", btie);
+    }
+    
+    String toBits(Integer input) => "".join { for (i in 0:32) input.rightLogicalShift(32 - 1 - i).and($1) };
+    
+    String fH([Integer, Integer] x) => toBits(x[0]) + "_" + toBits(x[1]);
+    
+    test
+    shared void sha512_0_b1() {
+        value csr = circularShiftRightTwoIntFor(32);
+        //value b1 = xorTwoInt(xorTwoInt(circularShiftRightTwoInt(e, 14), circularShiftRightTwoInt(e, 18)), circularShiftRightTwoInt(e, 41));
+        
+        // e0 = [#510E527F, #ADE682D1]
+        value e0ini = [$01010001000011100101001001111111, $10101101111001101000001011010001];
+        value e0c14 = [$00001011010001010100010000111001, $01001001111111101011011110011010];
+        value e0c18 = [$10100000101101000101010001000011, $10010100100111111110101101111001];
+        value e0c41 = [$00111111110101101111001101000001, $01101000101010001000011100101001];
+        print("e0ini: " + fH(e0ini));
+        print("");
+        print("e0c14: " + fH(e0c14));
+        print("csr14: " + fH(csr(e0ini, 14)));
+        print("");
+        print("e0c18: " + fH(e0c18));
+        print("csr18: " + fH(csr(e0ini, 18)));
+        print("");
+        print("e0c41: " + fH(e0c41));
+        print("csr41: " + fH(csr(e0ini, 41)));
+        print("");
+        assertEquals(csr(e0ini, 14), e0c14, "14", btie);
+        assertEquals(csr(e0ini, 18), e0c18, "18", btie);
+        assertEquals(csr(e0ini, 41), e0c41, "41", btie);
+    }
+    
+    test
+    shared void sha512_0_b0() {
+        value csr = circularShiftRightTwoIntFor(32);
+        //value b0 = xorTwoInt(xorTwoInt(circularShiftRightTwoInt(a, 28), circularShiftRightTwoInt(a, 34)), circularShiftRightTwoInt(a, 39));
+        
+        // a0 = [#6A09E667, #F3BCC908]
+        value a0ini = [$01101010000010011110011001100111, $11110011101111001100100100001000];
+        value a0c28 = [$00111011110011001001000010000110, $10100000100111100110011001111111];
+        value a0c34 = [$11111100111011110011001001000010, $00011010100000100111100110011001];
+        value a0c39 = [$11001111111001110111100110010010, $00010000110101000001001111001100];
+        print("a0ini: " + fH(a0ini));
+        print("");
+        print("a0c28: " + fH(a0c28));
+        print("csr28: " + fH(csr(a0ini, 28)));
+        print("");
+        print("a0c34: " + fH(a0c34));
+        print("csr34: " + fH(csr(a0ini, 34)));
+        print("");
+        print("a0c39: " + fH(a0c39));
+        print("csr39: " + fH(csr(a0ini, 39)));
+        print("");
+        assertEquals(csr(a0ini, 28), a0c28, "28", btie);
+        assertEquals(csr(a0ini, 34), a0c34, "34", btie);
+        assertEquals(csr(a0ini, 39), a0c39, "39", btie);
     }
 }
