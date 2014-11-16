@@ -142,18 +142,19 @@ shared class Sha512Compressor() satisfies FixedInputCompressor {
             }
             
             // Expand inital 32 Integers into 160
-            for (i in (32..159).by(2)) {
-                value m2 = makeTwoInt(words[i - 2], words[i - 2 + 1]);
-                value m7 = makeTwoInt(words[i - 7], words[i - 7 + 1]);
-                value m15 = makeTwoInt(words[i - 15], words[i - 15 + 1]);
-                value m16 = makeTwoInt(words[i - 16], words[i - 16 + 1]);
+            for (i in 16..79) {
+                value m2 = makeTwoInt(words[(i - 2) * 2], words[(i - 2) * 2 + 1]);
+                value m7 = makeTwoInt(words[(i - 7) * 2], words[(i - 7) * 2 + 1]);
+                value m15 = makeTwoInt(words[(i - 15) * 2], words[(i - 15) * 2 + 1]);
+                value m16 = makeTwoInt(words[(i - 16) * 2], words[(i - 16) * 2 + 1]);
                 
                 value s1 = xorTwoInt(xorTwoInt(circularShiftRightTwoInt(m2, 19), circularShiftRightTwoInt(m2, 61)), shiftRightTwoInt(m2, 6));
                 value s0 = xorTwoInt(xorTwoInt(circularShiftRightTwoInt(m15, 1), circularShiftRightTwoInt(m15, 8)), shiftRightTwoInt(m15, 7));
                 
                 value w = addTwoInt(addTwoInt(addTwoInt(s1, m7), s0), m16);
-                words.set(i, w[0]);
-                words.set(i + 1, w[1]);
+                
+                words.set(i * 2, w[0]);
+                words.set(i * 2 + 1, w[1]);
             }
             
             variable value a = makeTwoInt(intermediate.get(0), intermediate.get(1));
