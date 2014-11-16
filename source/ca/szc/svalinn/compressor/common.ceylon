@@ -112,6 +112,20 @@ shared [Integer, Integer] circularShiftRightTwoIntFor(Integer wordBitSize)([Inte
     return [cH.and(mask), cL.and(mask)];
 }
 
+shared Boolean bitwiseLessThanFor(Integer wordBitSize)(Integer a, Integer b) {
+    variable Integer mask = 0;
+    for (Integer i in 0 : wordBitSize - 1) {
+        if (i > 0) {
+            mask = mask.leftLogicalShift(1);
+        }
+        mask = mask.or($1);
+    }
+    
+    // Compare leftmost bit, then compare all other bits
+    return a.rightLogicalShift(wordBitSize - 1) < b.rightLogicalShift(wordBitSize - 1) ||
+            a.and(mask) < b.and(mask);
+}
+
 shared Integer bitwiseAdd(Integer a, Integer b) {
     variable Integer carry = a.and(b);
     variable Integer result = a.xor(b);
@@ -124,11 +138,12 @@ shared Integer bitwiseAdd(Integer a, Integer b) {
 }
 
 shared [Integer, Integer] addTwoIntFor(Integer wordBitSize)([Integer, Integer] one, [Integer, Integer] two) {
+    value bitwiseLessThan = bitwiseLessThanFor(wordBitSize);
     //Integer aL = bitwiseAdd(one[1], two[1]);
     Integer aL = one[1] + two[1];
     // Did aL overflow?
     Integer carry;
-    if (aL < one[1]) {
+    if (bitwiseLessThan(aL, one[1])) {
         carry = 1;
     } else {
         carry = 0;
