@@ -168,9 +168,9 @@ shared class Sha512Compressor() satisfies FixedInputCompressor {
             String toHex(Integer input) => "".join { for (i in (7..0)) formatInteger(input.rightLogicalShift(i * 4).and($1111), 16) };
             String fH([Integer, Integer] x) => toHex(x[0]) + "_" + toHex(x[1]);
             
-            for (i in (0..159).by(2)) {
-                value w = makeTwoInt(words.get(i), words.get(i + 1));
-                value k = makeTwoInt(constants.get(i), constants.get(i + 1));
+            for (i in 0..79) {
+                value w = makeTwoInt(words.get(i * 2), words.get(i * 2 + 1));
+                value k = makeTwoInt(constants.get(i * 2), constants.get(i * 2 + 1));
                 
                 value b1 = xorTwoInt(xorTwoInt(circularShiftRightTwoInt(e, 14), circularShiftRightTwoInt(e, 18)), circularShiftRightTwoInt(e, 41));
                 value ch = xorTwoInt(andTwoInt(e, f), andTwoInt(notTwoInt(e), g));

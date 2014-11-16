@@ -113,17 +113,18 @@ shared [Integer, Integer] circularShiftRightTwoIntFor(Integer wordBitSize)([Inte
 }
 
 shared Boolean bitwiseLessThanFor(Integer wordBitSize)(Integer a, Integer b) {
-    variable Integer mask = 0;
-    for (Integer i in 0 : wordBitSize - 1) {
-        if (i > 0) {
-            mask = mask.leftLogicalShift(1);
-        }
-        mask = mask.or($1);
-    }
+    //variable Integer mask = 0;
+    //for (Integer i in 0 : wordBitSize - 1) {
+    //    if (i > 0) {
+    //        mask = mask.leftLogicalShift(1);
+    //    }
+    //    mask = mask.or($1);
+    //}
     
     // Compare leftmost bit, then compare all other bits
     return a.rightLogicalShift(wordBitSize - 1) < b.rightLogicalShift(wordBitSize - 1) ||
-            a.and(mask) < b.and(mask);
+            a.rightLogicalShift(1) < b.rightLogicalShift(1);
+            //a.and(mask) < b.and(mask);
 }
 
 shared Integer bitwiseAdd(Integer a, Integer b) {
@@ -137,6 +138,11 @@ shared Integer bitwiseAdd(Integer a, Integer b) {
     return result;
 }
 
+// TODO remove, debug only
+String toBits(Integer input) => "".join { for (i in (31..0)) formatInteger(input.rightLogicalShift(i).and($1), 2) };
+String toHex(Integer input) => "".join { for (i in (7..0)) formatInteger(input.rightLogicalShift(i * 4).and($1111), 16) };
+String fH([Integer, Integer] x) => toHex(x[0]) + "_" + toHex(x[1]);
+
 shared [Integer, Integer] addTwoIntFor(Integer wordBitSize)([Integer, Integer] one, [Integer, Integer] two) {
     value bitwiseLessThan = bitwiseLessThanFor(wordBitSize);
     //Integer aL = bitwiseAdd(one[1], two[1]);
@@ -145,9 +151,20 @@ shared [Integer, Integer] addTwoIntFor(Integer wordBitSize)([Integer, Integer] o
     Integer carry;
     if (bitwiseLessThan(aL, one[1])) {
         carry = 1;
+        //print(toHex(aL) + " " + toHex(one[1]));
+        //print(" ".join { aL.rightLogicalShift(wordBitSize - 1), one[1].rightLogicalShift(wordBitSize - 1) });
+        //variable Integer mask = 0;
+        //for (Integer i in 0 : wordBitSize - 1) {
+        //    if (i > 0) {
+        //        mask = mask.leftLogicalShift(1);
+        //    }
+        //    mask = mask.or($1);
+        //}
+        //print(" ".join { toBits(one[1]), toBits(two[1]), toBits(aL), aL.and(mask), one[1].and(mask), aL.rightLogicalShift(wordBitSize - 1) < one[1].rightLogicalShift(wordBitSize - 1), aL.and(mask) < one[1].and(mask) });
     } else {
         carry = 0;
     }
+    
     //Integer aH = bitwiseAdd(bitwiseAdd(one[0], two[0]), carry);
     Integer aH = one[0] + two[0] + carry;
     
