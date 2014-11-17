@@ -259,24 +259,71 @@ shared class Sha512Compressor() satisfies FixedInputCompressor {
                 words.set(i, i1.or(i2).or(i3).or(i4).or(i5).or(i6).or(i7).or(i8));
             }
             
-            Integer mask = #FF_FF_FF_FF_FF_FF_FF_FF;
-            
             // Expand inital 16 Integers into 80
+            for (i in 16..79) {
+                Integer? m2 = words[i - 2];
+                Integer? m7 = words[i - 7];
+                Integer? m15 = words[i - 15];
+                Integer? m16 = words[i - 16];
+                assert (exists m2, exists m7, exists m15, exists m16);
+                
+                Integer s1 = circularShiftRight(m2, 19).xor(circularShiftRight(m2, 61).xor(m2.rightLogicalShift(6)));
+                Integer s0 = circularShiftRight(m15, 1).xor(circularShiftRight(m15, 8).xor(m15.rightLogicalShift(7)));
+                
+                words.set(i, s1 + m7 + s0 + m16);
+            }
             
-            // TODO
+            Integer? aI = intermediate.get(0);
+            Integer? bI = intermediate.get(1);
+            Integer? cI = intermediate.get(2);
+            Integer? dI = intermediate.get(3);
+            Integer? eI = intermediate.get(4);
+            Integer? fI = intermediate.get(5);
+            Integer? gI = intermediate.get(6);
+            Integer? hI = intermediate.get(7);
             
-            variable Integer? aI = intermediate.get(0);
-            variable Integer? bI = intermediate.get(1);
-            variable Integer? cI = intermediate.get(2);
-            variable Integer? dI = intermediate.get(3);
-            variable Integer? eI = intermediate.get(4);
-            variable Integer? fI = intermediate.get(5);
-            variable Integer? gI = intermediate.get(6);
-            variable Integer? hI = intermediate.get(7);
+            assert (exists aI, exists bI, exists cI, exists dI, exists eI, exists fI, exists gI, exists hI);
             
-            assert (exists a = aI, exists b = bI, exists c = cI, exists d = dI, exists e = eI, exists f = fI, exists g = gI, exists h = hI);
+            variable Integer a = aI;
+            variable Integer b = bI;
+            variable Integer c = cI;
+            variable Integer d = dI;
+            variable Integer e = eI;
+            variable Integer f = fI;
+            variable Integer g = gI;
+            variable Integer h = hI;
             
-            // TODO
+            for (i in 0..79) {
+                Integer? w = words.get(i);
+                Integer? k = constants.get(i);
+                assert (exists w, exists k);
+                
+                Integer b1 = circularShiftRight(e, 14).xor(circularShiftRight(e, 18).xor(circularShiftRight(e, 41)));
+                Integer ch = (e + f).xor(e.not.and(g));
+                Integer carry1 = h + b1 + ch + k + w;
+                
+                Integer b0 = circularShiftRight(a, 28).xor(circularShiftRight(a, 34)).xor(circularShiftRight(a, 39));
+                Integer maj = a.and(b).xor(a.and(c).xor(b.and(c)));
+                Integer carry2 = b0 + maj;
+                
+                h = g;
+                g = f;
+                f = e;
+                e = d + carry1;
+                d = c;
+                c = b;
+                b = a;
+                a = carry1 + carry2;
+            }
+            
+            intermediate.set(0, aI + a);
+            intermediate.set(1, bI + b);
+            intermediate.set(2, cI + c);
+            intermediate.set(3, dI + d);
+            intermediate.set(4, eI + e);
+            intermediate.set(5, fI + f);
+            intermediate.set(6, gI + g);
+            intermediate.set(7, hI + h);
         }
     }
     
