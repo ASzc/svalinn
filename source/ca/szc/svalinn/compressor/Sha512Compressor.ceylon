@@ -293,17 +293,25 @@ shared class Sha512Compressor() satisfies FixedInputCompressor {
             variable Integer g = gI;
             variable Integer h = hI;
             
+            String fH(Integer input) => "".join { for (i in (15..0)) formatInteger(input.rightLogicalShift(i * 4).and($1111), 16) };
+            
             for (i in 0..79) {
                 Integer? w = words.get(i);
                 Integer? k = constants.get(i);
                 assert (exists w, exists k);
                 
+                // CH( e, f, g) = (e AND f) XOR ( (NOT e) AND g)
+                // BSIG1(e) = ROTR^14(e) XOR ROTR^18(e) XOR ROTR^41(e)
+                // T1 = h + BSIG1(e) + CH(e,f,g) + Kt + Wt
                 Integer b1 = circularShiftRight(e, 14).xor(circularShiftRight(e, 18).xor(circularShiftRight(e, 41)));
                 Integer ch = (e + f).xor(e.not.and(g));
                 Integer carry1 = h + b1 + ch + k + w;
                 
+                // MAJ( a, b, c) = (a AND b) XOR (a AND c) XOR (b AND c)
+                // BSIG0(a) = ROTR^28(a) XOR ROTR^34(a) XOR ROTR^39(a)
+                // T2 = BSIG0(a) + MAJ(a,b,c)
                 Integer b0 = circularShiftRight(a, 28).xor(circularShiftRight(a, 34)).xor(circularShiftRight(a, 39));
-                Integer maj = a.and(b).xor(a.and(c).xor(b.and(c)));
+                Integer maj = a.and(b).xor(a.and(c)).xor(b.and(c));
                 Integer carry2 = b0 + maj;
                 
                 h = g;
@@ -314,6 +322,8 @@ shared class Sha512Compressor() satisfies FixedInputCompressor {
                 c = b;
                 b = a;
                 a = carry1 + carry2;
+                
+                print(" ".join { i, fH(w), fH(a), fH(b), fH(c), fH(d), fH(e), fH(f), fH(g), fH(h) });
             }
             
             intermediate.set(0, aI + a);
