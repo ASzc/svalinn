@@ -121,6 +121,12 @@ shared Boolean bitwiseLessThanFor(Integer wordBitSize)(Integer a, Integer b) {
     //    mask = mask.or($1);
     //}
     
+    // TODO
+    // Furthest leftward 1 bit more left is larger.
+    
+    // TODO
+    // If furthest leftward 1 bit is equal left, recurse?
+    
     // Compare leftmost bit, then compare all other bits
     return a.rightLogicalShift(wordBitSize - 1) < b.rightLogicalShift(wordBitSize - 1) ||
             a.rightLogicalShift(1) < b.rightLogicalShift(1);

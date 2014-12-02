@@ -194,17 +194,20 @@ shared class Sha512Compressor() satisfies FixedInputCompressor {
             }
             
             value h0 = makeTwoInt(intermediate.get(0), intermediate.get(1));
+            print(" ".join { fH(h0), fH(a) });
             value h0P = addTwoInt(h0, a);
             intermediate.set(0, h0P[0]);
             intermediate.set(1, h0P[1]);
             
             value h1 = makeTwoInt(intermediate.get(2), intermediate.get(3));
             value h1P = addTwoInt(h1, b);
+            print(" ".join { fH(h1), fH(b) });
             intermediate.set(2, h1P[0]);
             intermediate.set(3, h1P[1]);
             
             value h2 = makeTwoInt(intermediate.get(4), intermediate.get(5));
             value h2P = addTwoInt(h2, c);
+            print(" ".join { fH(h2), fH(c) });
             intermediate.set(4, h2P[0]);
             intermediate.set(5, h2P[1]);
             
