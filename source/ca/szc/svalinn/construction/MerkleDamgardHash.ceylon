@@ -2,16 +2,13 @@ import ca.szc.svalinn {
     BlockedVariableInputCompressor,
     FixedInputCompressor
 }
-import ceylon.language.meta.model {
-    Class
-}
 
 "Abstract class for hash functions that apply Merkle–Damgård construction in
  order to accept arbitrary sized input into a fixed input compression
  function."
 shared abstract class MerkleDamgardHash(delegateClass) satisfies BlockedVariableInputCompressor {
-    "An instance of this is created for use as the compression algorithm."
-    Class<FixedInputCompressor,[]> delegateClass;
+    "Called to create and instance for use as the compression algorithm."
+    FixedInputCompressor() delegateClass;
     
     "The encapsulated instance of [[delegateClass]]."
     FixedInputCompressor delegate = delegateClass();

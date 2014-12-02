@@ -2,9 +2,6 @@ import ca.szc.svalinn {
     KeyedVariableInputCompressor,
     BlockedVariableInputCompressor
 }
-import ceylon.language.meta.model {
-    Class
-}
 
 "An abstract class for applying secure hash (message digest) algorithms;
  
@@ -21,10 +18,10 @@ import ceylon.language.meta.model {
  output hash more resistant to certain kinds of reversal attacks (e.g. rainbow
  tables)."
 shared abstract class Hmac(delegateClass, originalKey) satisfies KeyedVariableInputCompressor {
-    "An instance of this is created for use as the HMAC hash algorithm.
+    "Called to create and instance for use as the HMAC hash algorithm.
      Technically only [[MerkleDamgardHash]] and other length
      extension vulnerable constructions need to use HMAC for MACs."
-    Class<BlockedVariableInputCompressor,[]> delegateClass;
+    BlockedVariableInputCompressor() delegateClass;
     
     "The encapsulated instance of [[delegateClass]]. Used to hash keys that are
      too long, and applied when creating the layered output hash."
