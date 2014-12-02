@@ -15,3 +15,17 @@ shared class Sha1() extends MerkleDamgardHash(Sha1Compressor) {}
 shared class Sha256() extends MerkleDamgardHash(Sha256Compressor) {}
 
 shared class Sha512() extends MerkleDamgardHash(Sha512Compressor) {}
+
+"Convenience function for [[Sha1]]. If you need to create multiple hashes, or
+ need to stream [[input]], it is more efficient to create and reuse a single
+ class instance."
+shared Array<Byte> sha1(Array<Byte> input) {
+    return Sha1().last(input);
+}
+
+"Convenience function for [[Sha256]]. If you need to create multiple hashes, or
+ need to stream [[input]], it is more efficient to create and reuse a single
+ class instance."
+shared Array<Byte> sha256(Array<Byte> input) {
+    return Sha256().last(input);
+}
